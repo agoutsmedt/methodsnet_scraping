@@ -15,6 +15,9 @@ format:
     # css: "custom.css"
     embed-resources: true
     view-distance: 100
+    progress: true
+    width: 1200
+    margin: 0.01
     preview-links: true
     code-tools: true
     code-line-numbers: false
@@ -82,6 +85,12 @@ p_load(tidyverse, # basic suite of packages
        DT) # to display html tables
 ```
 :::
+
+```{r}
+#| echo: FALSE
+p_load(here)
+```
+
 
 # What is web Scraping
 
@@ -260,14 +269,25 @@ bis_pages <- map(document_pages[1:5], # showing the code just on the first five 
 bis_pages <- tibble(year = str_extract(document_pages[1:5], "\\d{4}"),
                     urls = bis_pages) %>% 
   unnest(urls)
+```
 
+
+```{r eval=TRUE}
+#| echo: FALSE
 datatable(bis_pages,
           rownames = FALSE,
           class = 'cell-border stripe',
           options = list(
             searching = FALSE, # This removes the search bar
-            pageLength = 4, # This sets the initial number of rows displayed to 5
-            dom = "tip"))
+            pageLength = 10, # This sets the initial number of rows displayed to 5
+            dom = "tip")) %>%
+  # Add custom style to reduce font size
+  htmlwidgets::onRender("
+    function(el, x) {
+      $(el).css('font-size', '14px');  // Adjust the font size here
+      $(el).find('th').css('font-size', '12px');  // Adjust the header font size
+    }
+  ")
 ```
 
 ### Scraping a BIS speech with rvest
@@ -285,7 +305,7 @@ page <- 2
 day <- "01"
 month <- "10"
 year <- 2024
-url_second_page <- glue("{bis_website_path}?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
+url_second_page <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
 ```
 
 ::: {.notes}
@@ -309,7 +329,8 @@ First goes to the page and look at what a webpage looks like
 
 ### Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
 
-```{r launching-bot, eval=TRUE}
+```{r launching-bot}
+#| eval: false
 # Launch Selenium to go on the website of bis
 driver <- rsDriver(browser = "firefox", # can also be "chrome"
                    chromever = NULL,
@@ -320,7 +341,7 @@ remote_driver <- driver[["client"]]
 ### Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
 
 ::: {.fragment}
-```{r navigating, eval=TRUE}
+```{r navigating, eval=FALSE}
 remote_driver$navigate(url_second_page)
 Sys.sleep(session$delay)
 ```
@@ -329,50 +350,86 @@ Sys.sleep(session$delay)
 <br>
 
 ::: {.fragment}
-```{r element-date, eval=TRUE}
+```{r element-date, eval=FALSE}
 element <- remote_driver$findElement("css selector", ".item_date")
 element$getElementText()[[1]]
 ```
+
+```{r}
+#| echo: FALSE
+date <- "09 Oct 2024"
+print(date)
+```
+
 :::
 
 <br>
 
 ::: {.fragment}
-```{r all-elements, eval=TRUE}
+```{r all-elements, eval=FALSE}
 elements <- remote_driver$findElements("css selector", ".item_date")
 length(elements)
 ```
 
-```{r extract-text, eval=TRUE}
+```{r}
+#| echo: FALSE
+length <- 25
+print(length)
+```
+
+```{r extract-text, eval=FALSE}
 elements[[25]]$getElementText()[[1]]
 ```
+
+```{r}
+#| echo: FALSE
+last_date <- "02 Oct 2024"
+print(last_date)
+```
+
 :::
 
 ### Scraping one page {.scrollable}
 
-```{r scraping-page, eval=TRUE}
+```{r scraping-page, eval=FALSE}
+#| code-fold: true
 data_page <- tibble(date = remote_driver$findElements("css selector", ".item_date") %>% 
                       map_chr(., ~.$getElementText()[[1]]),
                     info = remote_driver$findElements("css selector", ".item_date+ td") %>% 
                       map_chr(., ~.$getElementText()[[1]]),
                     url = remote_driver$findElements("css selector", ".dark") %>% 
-                      map_chr(., ~.$getElementAttribute("href")[[1]]))
+                      map_chr(., ~.$getElementAttribute("href")[[1]])) %>% 
+  separate(info, c("title", "description", "speaker"), "\n")
+```
+
+
+```{r}
+#| echo: FALSE
+# Data from previous chunk has been saved: `saveRDS(data_page, here("slides", "data_page.rds"))`
+
+data_page <- readRDS(here("slides", "data_page.rds"))
 
 data_page %>% 
-  separate(info, c("title", "description", "speaker"), "\n") %>% 
   datatable(rownames = FALSE,
      class = 'cell-border stripe',
      options = list(
        searching = TRUE, # This removes the search bar
-       pageLength = 4, # This sets the initial number of rows displayed to 5
-       dom = "tip"))
+       pageLength = 6, # This sets the initial number of rows displayed to 5
+       dom = "tip")) %>%
+  # Add custom style to reduce font size
+  htmlwidgets::onRender("
+    function(el, x) {
+      $(el).css('font-size', '14px');  // Adjust the font size here
+      $(el).find('th').css('font-size', '12px');  // Adjust the header font size
+    }
+  ")
 ```
 
-### Scraping all the pages {.scrollable}
 
-```{r all-pages, eval=TRUE}
-starting_url <- glue("{bis_website_path}?fromDate={day}%2F{month}%2F{year}&cbspeeches_page=1&cbspeeches_page_length=25")
+### Scraping all the pages {.smaller}
 
+```{r all-pages, eval=FALSE}
+starting_url <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page=1&cbspeeches_page_length=25")
 remote_driver$navigate(starting_url)
 # Extract the total number of pages
 nb_pages <- remote_driver$findElement("css selector", ".pageof")$getElementText()[[1]] %>%
@@ -383,7 +440,7 @@ nb_pages <- remote_driver$findElement("css selector", ".pageof")$getElementText(
 metadata <- vector(mode = "list", length = nb_pages)
 
 for(page in 1:nb_pages){
-  url <- glue("{bis_website_path}?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
+  url <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
   remote_driver$navigate(url)
   nod <- nod(session, url) # introducing politely to the new page
   Sys.sleep(session$delay) # using the delay time set by polite
@@ -398,7 +455,6 @@ for(page in 1:nb_pages){
 
 metadata <- bind_rows(metadata) %>% 
   separate(info, c("title", "description", "speaker"), "\n")
-nrow(metadata)
 driver$server$stop() # we close the bot once we've finished
 ```
 
