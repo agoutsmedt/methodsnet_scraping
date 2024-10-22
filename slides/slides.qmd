@@ -1,6 +1,8 @@
 ---
 title: "Mastering Web Scraping for Data Collection"
-author: "Marine Bardou, Aurélien Goutsmedt, and Thomas Laloux"
+subtitle: "MethodsNET Workshop"
+author: "Marine Bardou, Aurélien Goutsmedt, and Thomas Laloux (UC Louvain)"
+date: "10/31/2024"
 format:
   revealjs: 
     theme: 
@@ -8,8 +10,8 @@ format:
     transition: convex
     slide-number: true
     toc: true 
-    toc-depth: 2
-    slide-level: 3
+    toc-depth: 1
+    slide-level: 2
     number-sections: true
     number-depth: 1
     # css: "custom.css"
@@ -32,25 +34,30 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 
 # Training Goals
 
-### Motivations
+## Motivations {.smaller}
 
 :::{.incremental .highlight-last}
-- Stimulating ideas for potential research using scraping and/or network analysis 
-- Introducing to the basic questions and steps in these kinds of analysis
-- Presenting the tools necessary for it (mostly in R)
+
+### First Session:
+
+- Giving a basic understanding of what web scraping is and what it can do
+- Discussing ethical (and legal) issues linked to web scraping
+- Proposing a roadmap for understanding how to proceed for practising web scraping using R
 - Providing bits of codes and practical tips
 
+### Second Session:
+
+- Hands-on practice by level of difficulty
+
 :::
 
-::: aside :::
-Not purely "hands-on" but you can try the code in the .qmd doc and tell me where you have some difficulties.
-:::
+
 
 ::: {.notes}
 - No review of the literature. No theoretical perspective. No presentation of various algorithms, their mathematical assumptions. No presentation of the best method. Kind of a basic roadmap for a social network analysis project, starting by the collection of the data yourself.
 :::
 
-### What we will do {.scrollable}
+## What we will do {.scrollable}
 
 :::{.incremental .highlight-last}
 - Scraping central bankers' speeches on the [Bank of International Settlements website](https://www.bis.org/cbspeeches/index.htm)
@@ -63,7 +70,7 @@ Not purely "hands-on" but you can try the code in the .qmd doc and tell me where
 Caveat: this data project has just been built for the training session, so it does not rely on any solid research question. 
 :::
 
-### Requisits {.scrollable}
+## Requisits {.scrollable}
 
 - Install R and RStudio
 - These slides are built from a ```.qmd``` (quarto) document $\Rightarrow$ all the codes used in these slides can be run in RStudio
@@ -94,7 +101,7 @@ p_load(here)
 
 # What is web Scraping
 
-### What is web scraping ?
+## What is web scraping ?
 
 :::{.incremental .highlight-last}
 - The **web scraping** is a method for extracting data available in the World Wide Web 
@@ -103,14 +110,14 @@ p_load(here)
 - Useful when many pages to scrape
 :::
 
-### API vs. web scraping
+## API vs. web scraping
 
 :::{.incremental .highlight-last}
 - **API (Application Programming Interface)** provides a structured and predictable way to retrieve data from a service. It's like ordering from a menu; you request specific data and receive it in a structured format
 - Web Scraping is the process of programmatically extracting data from the web page's HTML itself. It's akin to manually copying information from a book; you decide what information you need and how to extract it
 :::
 
-### API vs. web scraping
+## API vs. web scraping
 
 :::{.incremental .highlight-last}
 - **Control and Structure**: APIs offer structured access to data, whereas web scraping requires parsin HTML and often cleaning the data yourself.
@@ -120,7 +127,7 @@ p_load(here)
 :::
 
 
-### Small data everywhere
+## Small data everywhere
 
 :::{.incremental .highlight-last}
 - A large possibility of data you can collect:
@@ -137,7 +144,7 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 
 # The Ethics of Web Scraping
 
-### Ethical considerations {.scrollable}
+## Ethical considerations {.scrollable}
 
 :::{.incremental .highlight-last}
 - **Legal Considerations**: Not all data is free to scrape. Websites' terms of service may explicitly forbid web scraping, and in some jurisdictions, scraping can have legal implications
@@ -146,7 +153,7 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 - **Website Performance**: Scraping, especially if aggressive (e.g., making too many requests in a short period), can negatively impact the performance of a website, affecting its usability for others
 :::
 
-### Ethical practices
+## Ethical practices
 
 :::{.incremental .highlight-last}
 - **Respect ```robots.txt```**: This file on websites indicates which parts should not be scraped
@@ -158,7 +165,7 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 
 # How to scrape a website? 
 
-### The useful packages in R
+## The useful packages in R
 
 :::{.incremental .highlight-last}
 - [rvest](https://rvest.tidyverse.org/): scraping and cleaning html code
@@ -174,7 +181,7 @@ p_load(rvest, # scraping and manipulating html pages
 :::
 :::
 
-### Navigating the website
+## Navigating the website
 
 :::{.incremental .highlight-last}
 
@@ -202,7 +209,7 @@ bis_website_path <- "https://www.bis.org/cbspeeches/index.htm"
 Page BIS: we will extract date, titles, etc... But we don't want just the first page, so before to do that, we need to understand how to navigate between pages. 
 :::
 
-### The Role of Sitemaps
+## The Role of Sitemaps
 
 :::{.incremental .highlight-last}
 - Sitemap: to inform search engines about URLs on a website that are available for web crawling
@@ -219,7 +226,7 @@ Page BIS: we will extract date, titles, etc... But we don't want just the first 
 :::
 :::
 
-### Being respectful of the website {.scrollable}
+## Being respectful of the website {.scrollable}
 
 ::: {.fragment}
 
@@ -242,7 +249,7 @@ session$robotstxt$sitemap
 ```
 :::
 
-### Using sitemap {.scrollable}
+## Using sitemap {.scrollable}
 
 ```{r eval=TRUE}
 #| code-fold: true
@@ -290,11 +297,11 @@ datatable(bis_pages,
   ")
 ```
 
-### Scraping a BIS speech with rvest
+## Scraping a BIS speech with rvest
 
 "https://www.bis.org/review/r241010a.htm"
 
-### Scraping BIS: understanding URLs
+## Scraping BIS: understanding URLs
 
 The second page of our query:  
 
@@ -313,7 +320,7 @@ url_second_page <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}
 - Looking at the Website and the pattern of URL
 :::
 
-### Scraping one page: using a scrape helper
+## Scraping one page: using a scrape helper
 
 :::{.incremental .highlight-last}
 - Scraping add-ons on browser help you navigating through elements in a webpage
@@ -327,7 +334,7 @@ url_second_page <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}
 First goes to the page and look at what a webpage looks like
 :::
 
-### Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
+## Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
 
 ```{r launching-bot}
 #| eval: false
@@ -338,7 +345,7 @@ driver <- rsDriver(browser = "firefox", # can also be "chrome"
 remote_driver <- driver[["client"]]
 ```
 
-### Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
+## Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
 
 ::: {.fragment}
 ```{r navigating, eval=FALSE}
@@ -389,7 +396,7 @@ print(last_date)
 
 :::
 
-### Scraping one page {.scrollable}
+## Scraping one page {.scrollable}
 
 ```{r scraping-page, eval=FALSE}
 #| code-fold: true
@@ -426,7 +433,7 @@ data_page %>%
 ```
 
 
-### Scraping all the pages {.smaller}
+## Scraping all the pages {.smaller}
 
 ```{r all-pages, eval=FALSE}
 starting_url <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page=1&cbspeeches_page_length=25")
