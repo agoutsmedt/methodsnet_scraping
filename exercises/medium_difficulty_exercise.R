@@ -1,20 +1,26 @@
 ##### script medium exercise #####
 
 # Goal: 
-# You want to know what happenned to the files which were EU legislative priorities in 2023-2024
+# You want to know what happened to the files which were EU legislative priorities in 2023-2024
 # So you want to know what is the state of play for different legislation packages. 
 
-# Let's first load all the packages essential for web scraping
+# Let's first load packages we will need
 library(rvest)
 library(xml2)
 library(httr)
 library(stringr)
 library(dplyr)
+library(polite)
 
 # 1. We are going to list all relevant procedures. 
 # In the EU, once proposed each piece of legislation has a procedure number, including 'COD'. 
 # Go to this page that lists the legislative files which were priorities for 2023-24: https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en 
-# You have to scrape this page to obtain a dataframe, in which there will be the title, number and url towards the specific page of each procedure
+# You have to scrape this page to obtain a data frame, in which there will be the title, number and url towards the specific page of each procedure
+
+# Let's be polite! 
+website_ep <- "https://oeil.secure.europarl.europa.eu"
+session <- polite::bow(website_ep, 
+                       user_agent = "polite R package - used for academic training by Marine Bardou (marine.bardou@uclouvain.be)")
 
 # First, read the html page
 url <- "https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en"
@@ -23,8 +29,8 @@ page <- read_html(url)
 # Select all the names of the files
 name_procedure <- html_elements (page,css=".ep-table-cell-xxl .ep_name") %>%
   html_text()
-# Clean these names: remove tabs and special characters, and extra blank space. 
-# You can use two functions from the stringr package: str_replace_all and str_squish
+# Clean these names: remove tabs and special characters, and extra blank spaces. 
+# You can use two functions from the stringr package: str_replace_all() and str_squish()
 # Don't forget to print the resulting vector to check the result!
 clean_name_procedure <- str_replace_all(name_procedure, "\t", "") %>%
   str_replace_all(., "\r", "") %>%
@@ -69,12 +75,21 @@ my_procedures2 <- my_procedures[grepl("COD", my_procedures$number),]
 
 # 4. Take this single URL link: https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en
 # It is one of the ones you have listed
-# In a separate data frame (which will have only one line), scrape
+# In a separate data frame (which will have only one line, and three columns), scrape:
+# - the status of the procedure (i.e. at which stage it is)
 # - the date at which the legislative file was published
-# - the date at which the final act was published in the official journal
+# - the date at which the EP took its decision 
 
 # Let's read the page. 
 page2 <- read_html("https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en")
+
+# 4.a. Status of the procedure (observe: here the css selector is very "human readable")
+procedure_status <- html_nodes(page2,
+                              ".procedure-status") %>%
+  html_text() %>%
+  gsub ("\r","",.) %>%
+  gsub("\n","",.) %>%
+  gsub("\t","",.)
 
 # 4.b. Date of publication of legislative proposal
 # Tip: first, select all the dates. 
@@ -97,19 +112,17 @@ date_publication_proposal <- table_key_dates[table_key_events %>% #taking the ri
   gsub("\n","",.) %>%
   gsub("\t","",.)
 
-# 4.c Date of publication in the Official Journal
-date_publication_official_journal <- table_key_dates[table_key_events %>% #taking the right element
-                                               grep("Official",.)] %>%
+# 4.c Date of EP decision
+date_EP_decision <- table_key_dates[table_key_events %>%
+                                               grep("Decision",.)] %>%
   gsub ("\r","",.) %>%
   gsub("\n","",.) %>%
   gsub("\t","",.)
 
 # 4.d. Put everything in a data frame 
-my_first_scrap <- data.frame(key_players_rapporteur,
+my_first_scrap <- data.frame(procedure_status,
                              date_publication_proposal,
-                             date_publication_official_journal)
-
-####### Date of adoption or publication in the official journal??? (there are not much processes already completed####
+                             date_EP_decision)
 
 # 5. Write a function that automates the scraping you did at question (generalize your code!). 
 # For each URL, the function has to scrape the same three pieces of information. 
@@ -118,18 +131,23 @@ my_first_scrap <- data.frame(key_players_rapporteur,
 # 5.a Write the function. You can find explanations about creating a function in R here: 
 # https://www.r-bloggers.com/2022/04/how-to-create-your-own-functions-in-r/
 
-# Tip: In the function, you can use the matrix function to bind the different information together
-# At the end,write return(created_matrix). This indicates to R that it is the output of the function. 
+# Tip: In the function, you can use the data.frame() function to bind the different information together
+# At the end,write return(created_data_frame). This indicates to R that it is the output of the function. 
 
-# Tip: You can clean the two character strings at the same time. You can use the function mutate for this. 
+# Tip: You can clean the all your character strings at the same time. You can use the function mutate for this. 
 # Otherwise, you can just clean them one after the other. 
 
 # Tip: some of the info you are looking for may not be on all pages. 
-# use the function length to check it, and write "To check" if the information is not found. 
+# Use the function length() to check whether your code found something, and write "To check" if the information is not found. 
 # Why is some info missing on some pages?
 
 MY_SCRAPER <- function (x) {
   my_page <- read_html(x)
+  
+  # Select the procedure status
+  procedure_status <- html_nodes(my_page,
+                                 ".procedure-status") %>%
+    html_text()
   
   # Select all the key events
   table_key_events <- html_nodes(my_page,
@@ -145,48 +163,60 @@ MY_SCRAPER <- function (x) {
   date_publication_proposal <- table_key_dates[table_key_events %>% #
                                                  grep("proposal",.)] 
   
-  # Date of publication in the Official Journal
-  date_publication_official_journal <- table_key_dates[table_key_events %>% #taking the right element
-                                                         grep("adopted",.)] 
-  date_publication_official_journal <- ifelse(length(date_publication_official_journal) != 1,
+  # Date of EP decision
+  date_EP_decision <- table_key_dates[table_key_events %>% #taking the right element
+                                                         grep("Decision",.)] 
+  date_EP_decision <- ifelse(length(date_EP_decision) != 1,
                                               "To check",
-                                              date_publication_official_journal) 
+                                              date_EP_decision) 
   
   # Binding the different pieces of information together
-  my_data <- data.frame(date_publication_proposal,
-                      date_publication_official_journal) %>%
-    mutate(across(everything(), ~ gsub("\r", "", gsub("\n", "", gsub("\t", "", .)))))
+  my_data <- data.frame(procedure_status,
+    date_publication_proposal,
+    date_EP_decision) %>%
+    mutate(across(everything(), ~ gsub("\r", "", 
+                                       gsub("\n", "", 
+                                            gsub("\t", "", .)))))
   
   
   return(my_data)
 }  
 
 
-# 5.b Test the function. To do this, run the function on the first element of the links vector.
+# 5.b Test the function. To do this, run the function on one of the links (only one!)
 MY_SCRAPER(my_procedures2$link[129])
 
 # 5.c Run the function. Use as input the list of URLs that you made previously. 
 # You will need to use the lapply() function to apply you function to this list of URLs.
-# Once you ran the function, you need to bind the results together. 
-# Otherwise, you just have a list of separate data frames for each procedure. You can use do.call. 
 results <- lapply (my_procedures2$link, MY_SCRAPER)
+# Once you ran the function, you need to bind the results together by "horizontally" (i.e. above each other)
+# Otherwise, you just have a list of separate data frames for each procedure. 
+# Which R function allows you to do this?
+# You can use do.call() to apply this function to all the results, and then transform in a data frame.
 my_results_clean <- do.call("rbind",results)%>%as.data.frame
 
-# 5.d Bind the result of your scraping with you original dataframe containing the links. 
+# 5.d Bind the results of your scraping with your original dataframe containing the links. 
 # Tip: we can do this because here, we are sure that our input links (and procedures) are in the same order as the results.
 # Otherwise, scrape the reference procedure on the page to make sure. 
 my_results_complete <- cbind(my_procedures2,
                              my_results_clean)
+# Let's have a look at the data frame we created
+View(my_results_complete)
 
 # 6. Calculate the duration of each legislative process (in days) in a new column of your data frame. 
-# Calculate it as the number of days between the legislative proposal and the publication in the official journal.
+# Calculate it as the number of days between the legislative proposal and the EP decision.
 # Tip: you have to tell R that you are working with dates. 
 # Search which function allows to do this!
 my_results_complete$date_publication_proposal <- as.Date(my_results_complete$date_publication_proposal,
                                                          "%d/%m/%Y")
-my_results_complete$date_publication_official_journal <- as.Date(my_results_complete$date_publication_official_journal,
+my_results_complete$date_EP_decision <- as.Date(my_results_complete$date_EP_decision,
                                                                  "%d/%m/%Y")
-my_results_complete$duration_legislative_process<- my_results_complete$date_publication_official_journal - 
-  my_results_complete$date_publication_proposal
+# What happens to the cases where the date of EP decision is not yet available?
+# Pay attention when calculating the duration!
+my_results_complete$duration_legislative_process<- my_results_complete$date_EP_decision - 
+  my_results_complete$date_publication_proposa
 # Let's look for the longer process. 
-max(my_results_complete$duration_legislative_process, na.rm = TRUE)
+max(my_results_complete$duration_legislative_process, 
+    na.rm = TRUE)
+my_results_complete$link[which.max(my_results_complete$duration_legislative_process)]
+# This procedure started in 2016!
