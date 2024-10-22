@@ -12,7 +12,7 @@ library(stringr)
 library(dplyr)
 library(polite)
 
-# 1. We are going to list all relevant procedures. 
+# 1. We are going to list all relevant procedures
 # In the EU, once proposed each piece of legislation has a procedure number, including 'COD'. 
 # Go to this page that lists the legislative files which were priorities for 2023-24: https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en 
 # You have to scrape this page to obtain a data frame, in which there will be the title, number and url towards the specific page of each procedure
@@ -27,53 +27,53 @@ url <- "https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41
 page <- read_html(url)
 
 # Select all the names of the files
-name_procedure <- html_elements (page,css=".ep-table-cell-xxl .ep_name") %>%
-  html_text()
-# Clean these names: remove tabs and special characters, and extra blank spaces. 
-# You can use two functions from the stringr package: str_replace_all() and str_squish()
+name_procedure <- html_elements(page,css = ".ep-table-cell-xxl .ep_name") %>%
+  html_text2() # Extract the text 
+# html_text2() allows also to clean by removing tabs and extra blank spaces. 
+
+# We still have some "\r" which is a code for returning to the beginning of the line. 
+# You can use two functions from the stringr package: str_remove_all() to remove all the "\r" and str_squish() to remove all the resulting extra white spaces.
 # Don't forget to print the resulting vector to check the result!
-clean_name_procedure <- str_replace_all(name_procedure, "\t", "") %>%
-  str_replace_all(., "\r", "") %>%
-  str_replace_all(., "\n", "") %>%
+clean_name_procedure <- name_procedure %>%
+  str_remove_all(., "\r") %>%
   str_squish()
 
 # Select all the procedure numbers of the files
-number_procedure <- html_elements (page,css=".ep-table-cell-s a") %>%
-  html_text()
-# Like previously, don't forget to clean white space and special character
-clean_number_procedure <- str_replace_all(number_procedure, "\t", "") %>%
-  str_replace_all(., "\r", "") %>%
-  str_replace_all(., "\n", "") %>%
-  str_squish()
+clean_number_procedure <- html_elements(page, css = ".ep-table-cell-s .ep_name") %>%
+  html_text2() %>% 
+  str_remove_all(., "\r") %>% # Remove all the line returns
+  str_squish() # Remove all the extra white spaces
 
 # Select all the links towards the procedure pages
-link_procedure <- html_elements (page,css=".ep-table-cell-s a") %>%
+link_procedure <- html_elements(page, css = ".ep-table-cell-s a") %>%
   html_attr("href")
+
 # Check one or two links - can you copy paste them in a browser and access the page?
 # Is there anything missing in the URL? How could you fix this?
 # Search manually a procedure here to find out how urls are made: https://oeil.secure.europarl.europa.eu/oeil/search/search.do?searchTab=y
 # Tip: you can use the paste function 
-clean_link_procedure <- paste("https://oeil.secure.europarl.europa.eu", link_procedure, sep="")
+clean_link_procedure <- paste0("https://oeil.secure.europarl.europa.eu", link_procedure)
 
-# Put all the information in a data frame
-# Tip: use the data.frame function
-my_procedures <- data.frame(clean_name_procedure,
-                            clean_number_procedure,
-                            clean_link_procedure)
-# Tip: you may want to rename the columns at this point. For this you can use the function colnames. 
-colnames(my_procedures) <- c("name",
-                             "number",
-                             "link")
+# Check the length of the vectors. They should all be the same.
+if(length(clean_name_procedure) == length(number_procedure) & length(number_procedure) == length(link_procedure)){
+  message("All vectors have the same length")
+}
 
-# 2. Now you have listed the names of all relevant procedures, and the links to access them.
+# Put all the information in a tibble (the tidyverse format for data frames)
+my_procedures <- tibble(name = clean_name_procedure,
+                        number = clean_number_procedure,
+                        link = clean_link_procedure)
+
+# 2. Now you have listed the names of all relevant procedures, and the links to access them
 # You are only interest in procedures having COD in their name. 
 # Create a data frame that contains only procedure with 'COD' in their number. 
-# Tip: you can use the the grepl function.
-my_procedures2 <- my_procedures[grepl("COD", my_procedures$number),]
+# Tip: you can use the the str_detect() function of stringr.
+my_procedures_cod <- my_procedures %>% 
+  filter(str_detect(number, "COD"))
 # Check whether you now have the right number of procedures. 
 # You should now have 160. 
 
-# 4. Take this single URL link: https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en
+# 3 Take this single URL link: https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en
 # It is one of the ones you have listed
 # In a separate data frame (which will have only one line, and three columns), scrape:
 # - the status of the procedure (i.e. at which stage it is)
@@ -81,127 +81,111 @@ my_procedures2 <- my_procedures[grepl("COD", my_procedures$number),]
 # - the date at which the EP took its decision 
 
 # Let's read the page. 
-page2 <- read_html("https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en")
+procedure_page <- read_html("https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en")
 
-# 4.a. Status of the procedure (observe: here the css selector is very "human readable")
-procedure_status <- html_nodes(page2,
+# 3.a. Status of the procedure (observe: here the css selector is very "human readable")
+procedure_status <- html_elements(procedure_page,
                               ".procedure-status") %>%
-  html_text() %>%
-  gsub ("\r","",.) %>%
-  gsub("\n","",.) %>%
-  gsub("\t","",.)
+  html_text2()
 
-# 4.b. Date of publication of legislative proposal
+# 3.b. Date of publication of legislative proposal
 # Tip: first, select all the dates. 
 # Then, select the names of all the events to which they correspond. 
 # Finally, select your event of interest with grepl (use for example "proposal")
 
 # Select all key dates
-table_key_dates <- html_nodes(page2,
-                              "#key_events-data .ep-table-cell-s") %>%
-  html_text()
+key_dates <- html_elements(procedure_page,
+                              "#key_events-data .ep-table-cell-s .ep_name") %>%
+  html_text() 
 
 # Select all the key events
-table_key_events <- html_nodes(page2,
-                              "#key_events-data .ep-table-cell-xl") %>%
-  html_text()
-# Select the right date and clean your character string!
-date_publication_proposal <- table_key_dates[table_key_events %>% #taking the right element
-                                        grep("proposal",.)] %>%
-  gsub ("\r","",.) %>%
-  gsub("\n","",.) %>%
-  gsub("\t","",.)
+key_events <- html_elements(procedure_page,
+                              "#key_events-data .ep-table-cell-xl .ep_name") %>%
+  html_text() 
 
-# 4.c Date of EP decision
-date_EP_decision <- table_key_dates[table_key_events %>%
-                                               grep("Decision",.)] %>%
-  gsub ("\r","",.) %>%
-  gsub("\n","",.) %>%
-  gsub("\t","",.)
+# Select the right date and clean your character string by selecting the right row
+date_publication_proposal <- key_dates[str_which(key_events, "proposal")] 
 
-# 4.d. Put everything in a data frame 
-my_first_scrap <- data.frame(procedure_status,
-                             date_publication_proposal,
-                             date_EP_decision)
+# 3.c Date of EP decision
+date_EP_decision <- key_dates[str_which(key_events, "Decision")]
 
-# 5. Write a function that automates the scraping you did at question (generalize your code!). 
+# 3.d. Put everything in tibble
+my_first_scrap <- tibble(procedure_status = procedure_status,
+                         date_publication_proposal = date_publication_proposal,
+                         date_EP_decision = date_EP_decision)
+
+# 4. Write a function that automates the scraping you did at question 3. (generalize your code!). 
 # For each URL, the function has to scrape the same three pieces of information. 
 # Run that function and store the results in a data frame that also contains the number of the procedures and their URLs.
 
 # 5.a Write the function. You can find explanations about creating a function in R here: 
 # https://www.r-bloggers.com/2022/04/how-to-create-your-own-functions-in-r/
 
-# Tip: In the function, you can use the data.frame() function to bind the different information together
-# At the end,write return(created_data_frame). This indicates to R that it is the output of the function. 
-
-# Tip: You can clean the all your character strings at the same time. You can use the function mutate for this. 
-# Otherwise, you can just clean them one after the other. 
+# Tip: In the function, you can use the tibble() function to bind the different information together
+# At the end, write return(created_data_frame). This indicates to R that it is the output of the function. 
 
 # Tip: some of the info you are looking for may not be on all pages. 
 # Use the function length() to check whether your code found something, and write "To check" if the information is not found. 
 # Why is some info missing on some pages?
 
-MY_SCRAPER <- function (x) {
-  my_page <- read_html(x)
+scraping_all_pages <- function (url) {
+  my_page <- read_html(url)
+  Sys.sleep(session$delay) # Be polite!
   
   # Select the procedure status
-  procedure_status <- html_nodes(my_page,
+  procedure_status <- html_elements(my_page,
                                  ".procedure-status") %>%
-    html_text()
+    html_text2()
   
   # Select all the key events
-  table_key_events <- html_nodes(my_page,
-                                 "#key_events-data .ep-table-cell-xl") %>%
+  key_dates <- html_elements(my_page,
+                                 "#key_events-data .ep-table-cell-s .ep_name") %>%
     html_text()
   
   # Select all the key dates
-  table_key_dates <- html_nodes(my_page,
-                                "#key_events-data .ep-table-cell-s") %>%
+  key_events <- html_elements(my_page,
+                                "#key_events-data .ep-table-cell-xl .ep_name") %>%
     html_text()
   
   # Date publication proposal
-  date_publication_proposal <- table_key_dates[table_key_events %>% #
-                                                 grep("proposal",.)] 
+  date_publication_proposal <- key_dates[str_which(key_events, "proposal")] 
   
   # Date of EP decision
-  date_EP_decision <- table_key_dates[table_key_events %>% #taking the right element
-                                                         grep("Decision",.)] 
+  date_EP_decision <- key_dates[str_which(key_events, "Decision")]
+  
   date_EP_decision <- ifelse(length(date_EP_decision) != 1,
                                               "To check",
                                               date_EP_decision) 
   
   # Binding the different pieces of information together
-  my_data <- data.frame(procedure_status,
-    date_publication_proposal,
-    date_EP_decision) %>%
-    mutate(across(everything(), ~ gsub("\r", "", 
-                                       gsub("\n", "", 
-                                            gsub("\t", "", .)))))
-  
+  my_data <- tibble(link = url, # the url will serve as a reference to join the new dataset with my_procedures_cod
+                    procedure_status = procedure_status,
+                    date_publication_proposal = date_publication_proposal,
+                    date_EP_decision = date_EP_decision)
   
   return(my_data)
 }  
 
 
 # 5.b Test the function. To do this, run the function on one of the links (only one!)
-MY_SCRAPER(my_procedures2$link[129])
+scraping_all_pages(my_procedures_cod$link[129])
 
 # 5.c Run the function. Use as input the list of URLs that you made previously. 
 # You will need to use the lapply() function to apply you function to this list of URLs.
-results <- lapply (my_procedures2$link, MY_SCRAPER)
+# We can test this on the ten first links
+results <- lapply(my_procedures_cod$link[1:10], scraping_all_pages)
 # Once you ran the function, you need to bind the results together by "horizontally" (i.e. above each other)
 # Otherwise, you just have a list of separate data frames for each procedure. 
 # Which R function allows you to do this?
-# You can use do.call() to apply this function to all the results, and then transform in a data frame.
-my_results_clean <- do.call("rbind",results)%>%as.data.frame
+# You can use bind_rows() from dplyr to aggregate all the tibbles.
+my_results_clean <- results %>% 
+  bind_rows()
 
 # 5.d Bind the results of your scraping with your original dataframe containing the links. 
-# Tip: we can do this because here, we are sure that our input links (and procedures) are in the same order as the results.
-# Otherwise, scrape the reference procedure on the page to make sure. 
-my_results_complete <- cbind(my_procedures2,
-                             my_results_clean)
-# Let's have a look at the data frame we created
-View(my_results_complete)
+# Tip: we can do a bind_col() because here, we are sure that our input links (and procedures) are in the same order as the results.
+# Otherwise, more generally, it is preferable to have a common identifier in each table and to use a join function.
+my_results_complete <- my_procedures_cod %>% 
+  left_join(my_results_clean, by = "link")
 
 # 6. Calculate the duration of each legislative process (in days) in a new column of your data frame. 
 # Calculate it as the number of days between the legislative proposal and the EP decision.
