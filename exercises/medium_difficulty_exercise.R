@@ -5,12 +5,9 @@
 # So you want to know what is the state of play for different legislation packages. 
 
 # Let's first load packages we will need
-library(rvest)
-library(xml2)
-library(httr)
-library(stringr)
-library(dplyr)
-library(polite)
+pacman::p_load(tidyverse, 
+               rvest, 
+               polite)
 
 # 1. We are going to list all relevant procedures
 # In the EU, once proposed each piece of legislation has a procedure number, including 'COD'. 
