@@ -182,7 +182,7 @@ my_results_clean <- results %>%
 # Tip: we can do a bind_col() because here, we are sure that our input links (and procedures) are in the same order as the results.
 # Otherwise, more generally, it is preferable to have a common identifier in each table and to use a join function.
 my_results_complete <- my_procedures_cod %>% 
-  left_join(my_results_clean, by = "link")
+  join(my_results_clean, by = "link")
 
 # 6. Calculate the duration of each legislative process (in days) in a new column of your data frame. 
 # Calculate it as the number of days between the legislative proposal and the EP decision.
