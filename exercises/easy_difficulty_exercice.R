@@ -8,11 +8,9 @@
 
 # Step 1: Load necessary packages
 # We use the pacman package to manage dependencies and load required libraries in one command
-install.packages("pacman")
 pacman::p_load(tidyverse, 
                rvest,      # For web scraping
                polite,     # To scrape politely
-               ggplot2,    # For data visualization
                patchwork)  # For combining multiple plots
 
 # Step 2: Scrape Election Data for the UK
@@ -30,24 +28,24 @@ page <- read_html(url)
 
 # 2.4: Extract data from the page
 # Extract the names of the parties
-page %>%
+party <- page %>%
   html_elements(".e1j83d2f2") %>%
-  html_text() -> party
+  html_text()
 
 # Extract the number of seats won by each party
-page %>%
+seat <- page %>%
   html_elements(".ssrcss-a2di88-ResultValue") %>%
-  html_text() -> seat 
+  html_text()
 
 # Extract the changes in seat numbers (gain/loss) per party
-page %>%
+change_seat <- page %>%
   html_elements(".e1k9l0jz3:nth-child(2) .e1k9l0jz0") %>%
-  html_text() -> change_seat 
+  html_text()
 
 # Extract the number of votes each party received
-page %>%
+number_vote <- page %>%
   html_elements(".e1k9l0jz3:nth-child(3) .e1k9l0jz0") %>%
-  html_text() -> number_vote 
+  html_text()
 
 # 2.5: Store the extracted data in a tibble and convert relevant columns to numeric types
 Election_UK <- tibble(party, seat, change_seat, number_vote)
@@ -85,11 +83,6 @@ length(Election_UK$party)
 
 # Step 4: Visualize the number of votes per seat in the UK
 
-# 6.2: Filter for parties that won at least one seat and calculate votes per seat
-Election_UK <- Election_UK %>%
-  filter(seat > 0) %>%
-  mutate(voteperseat = number_vote/seat)
-
 # Create a bar plot for the number of votes per seat for each party
 # You can use the ggplot2 package.
 Figure_UK <- ggplot(Election_UK, aes(y = reorder(party, voteperseat), 
@@ -98,7 +91,7 @@ Figure_UK <- ggplot(Election_UK, aes(y = reorder(party, voteperseat),
   theme_bw() +
   ggtitle("Number of Votes per Seat in the UK") +
   scale_x_continuous(name = "Number of votes per seat", 
-                     labels = scales::comma_format(big.mark = '.'))
+                     labels = scales::comma_format(big.mark = ' '))
 
 Figure_UK
 
@@ -109,21 +102,21 @@ url <- "https://www.bbc.com/news/election/2024/uk/regions/E92000001"
 page <- read_html(url)
 
 # 5.2: Extract the data similarly to the UK process
-page %>%
+party <- page %>%
   html_elements(".e1j83d2f2") %>%
-  html_text() -> party
+  html_text() 
 
-page %>%
+seat <- page %>%
   html_elements(".ssrcss-a2di88-ResultValue") %>%
-  html_text() -> seat 
+  html_text()
 
-page %>%
+change_seat <- page %>%
   html_elements(".e1k9l0jz3:nth-child(2) .e1k9l0jz0") %>%
-  html_text() -> change_seat 
+  html_text() 
 
-page %>%
+number_vote <- page %>%
   html_elements(".e1k9l0jz3:nth-child(3) .e1k9l0jz0") %>%
-  html_text() -> number_vote 
+  html_text()
 
 # Store data in a tibble and remove unnecessary variables
 Election_EN <- tibble(party, seat, change_seat, number_vote)
@@ -134,8 +127,6 @@ Election_EN <- Election_EN %>%
   mutate(change_seat = gsub("\\+", "", change_seat) %>% as.numeric(),
          seat = as.numeric(seat),
          number_vote = as.numeric(gsub(",", "", number_vote)))
-
-
 
 # Step 6: Analyze England Election Data
 
@@ -157,11 +148,11 @@ length(Election_EN$party)
 # Step 7: Visualize the number of votes per seat in England
 
 # Create a bar plot for the number of votes per seat for each party in England
-ggplot(Election_EN, aes(y = reorder(party, voteperseat), x = voteperseat)) +
+Figure_EN <- ggplot(Election_EN, aes(y = reorder(party, voteperseat), x = voteperseat)) +
   geom_col(fill = 'grey') +
   theme_bw() +
   ggtitle("Number of Votes per Seat in England") +
-  scale_x_continuous(name = "Number of votes per seat", labels = scales::comma_format(big.mark = '.')) -> Figure_EN
+  scale_x_continuous(name = "Number of votes per seat", labels = scales::comma_format(big.mark = ' '))
 
 Figure_EN
 
@@ -179,4 +170,4 @@ tibble(Country=c("England","UK"),
 Figure_UK / Figure_EN &
   scale_x_continuous(limits = c(0, 840000), 
                      name = "Number of votes per seat", 
-                     labels = scales::comma_format(big.mark = '.'))
+                     labels = scales::comma_format(big.mark = ' '))
