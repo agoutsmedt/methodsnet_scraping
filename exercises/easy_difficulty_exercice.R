@@ -76,7 +76,7 @@ Election_UK %>%
 # Tip: you can use the function mutate().
 Election_UK <- Election_UK %>%
   filter(seat > 0) %>%
-  mutate(voteforseat = number_vote / seat)
+  mutate(voteperseat = number_vote / seat)
 print(Election_UK)
 
 # 3.3: Determine the number of parties that won at least one seat.
@@ -171,7 +171,7 @@ Figure_EN
 # Take information from the tables already created and compile it in a new one. 
 tibble(Country=c("England","UK"),
        Nparties=c(length(Election_EN$party),length(Election_UK$party)),
-       voteforsiege=c(mean(Election_EN$voteperseat),mean(Election_UK$voteperseat))) %>%
+       voteperseat=c(mean(Election_EN$voteperseat),mean(Election_UK$voteperseat))) %>%
   print()
 
 # 8.2: Create a visual comparison between the UK and England.
