@@ -7,6 +7,7 @@
 # Let's first load packages we will need
 install.packages("pacman")
 pacman::p_load(tidyverse, 
+               plyr,
                rvest, 
                polite)
 
@@ -53,7 +54,7 @@ link_procedure <- html_elements(page, css = ".ep-table-cell-s a") %>%
 clean_link_procedure <- paste0("https://oeil.secure.europarl.europa.eu", link_procedure)
 
 # Check the length of the vectors. They should all be the same.
-if(length(clean_name_procedure) == length(number_procedure) & length(number_procedure) == length(link_procedure)){
+if(length(clean_name_procedure) == length(clean_number_procedure) & length(clean_number_procedure) == length(link_procedure)){
   message("All vectors have the same length")
 }
 
@@ -185,6 +186,7 @@ my_results_clean <- results %>%
 my_results_complete <- my_procedures_cod %>% 
   join(my_results_clean, by = "link")
 
+
 # 6. Calculate the duration of each legislative process (in days) in a new column of your data frame. 
 # Calculate it as the number of days between the legislative proposal and the EP decision.
 # Tip: you have to tell R that you are working with dates. 
@@ -201,4 +203,4 @@ my_results_complete$duration_legislative_process<- my_results_complete$date_EP_d
 max(my_results_complete$duration_legislative_process, 
     na.rm = TRUE)
 my_results_complete$link[which.max(my_results_complete$duration_legislative_process)]
-# This procedure started in 2016!
+# So When did the procedure start?
