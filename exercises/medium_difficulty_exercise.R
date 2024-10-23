@@ -5,6 +5,7 @@
 # So you want to know what is the state of play for different legislation packages. 
 
 # Let's first load packages we will need
+install.packages("pacman")
 pacman::p_load(tidyverse, 
                rvest, 
                polite)
