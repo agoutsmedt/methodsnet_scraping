@@ -1,0 +1,21 @@
+/* Center h1 section titles (for others: section h1, section h2, section h3,...) */
+section h1 {
+  text-align: center;            /* Horizontally center the text */
+/*  justify-content: center;       /* Horizontally align the text in the center */
+/*  height: 100vh;                 /* Full height of the slide */
+/*  margin: 0;                     /* Remove any margins */
+/*  margin-bottom: 20px;  /* Adds 20px of space after the title */
+}
+
+.small-text {
+  font-size: 0.9em; /* Adjust the value to reduce the font size */
+}
+
+.very-small-text {
+  font-size: 0.65em; /* Adjust the value to reduce the font size */
+}
+
+.reveal .output pre {
+  max-height: 200px; /* Adjust to your preferred height */
+  overflow-y: auto;
+}

@@ -9,12 +9,12 @@ format:
       [solarized, custom.scss]
     transition: convex
     slide-number: true
-    toc: true 
+    toc: false 
     toc-depth: 1
     slide-level: 2
     number-sections: true
     number-depth: 1
-    # css: "custom.css"
+    css: "custom.css"
     embed-resources: true
     view-distance: 100
     progress: true
@@ -25,6 +25,9 @@ format:
     code-line-numbers: false
     code-copy: true
     code-link: true
+    code-overflow: wrap
+    code-block-height: 400px
+lightbox: auto
 bibliography: "bibliography.bib" 
 ---
 
@@ -45,35 +48,24 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 - Proposing a roadmap for understanding how to proceed for practising web scraping using R
 - Providing bits of codes and practical tips
 
+<br> 
+
 ### Second Session:
 
-- Hands-on practice by level of difficulty
+- Hands-on practice with different exercises by level of difficulty
 
 :::
-
-
 
 ::: {.notes}
-- No review of the literature. No theoretical perspective. No presentation of various algorithms, their mathematical assumptions. No presentation of the best method. Kind of a basic roadmap for a social network analysis project, starting by the collection of the data yourself.
+
 :::
 
-## What we will do {.scrollable}
+## Requisits
 
 :::{.incremental .highlight-last}
-- Scraping central bankers' speeches on the [Bank of International Settlements website](https://www.bis.org/cbspeeches/index.htm)
-- Identifying to which central bank the speaker belongs and where the speech is given
-- Building a network of institutions/events and analyzing this network
-- Building informative visualization of the network
-:::
-
-::: aside :::
-Caveat: this data project has just been built for the training session, so it does not rely on any solid research question. 
-:::
-
-## Requisits {.scrollable}
-
-- Install R and RStudio
+- Need of R and RStudio for the second session
 - These slides are built from a ```.qmd``` (quarto) document $\Rightarrow$ all the codes used in these slides can be run in RStudio
+:::
 
 ::: {.fragment}
 ```{r installing-packages}
@@ -104,26 +96,54 @@ p_load(here)
 ## What is web scraping ?
 
 :::{.incremental .highlight-last}
+:::{.small-text}
 - The **web scraping** is a method for extracting data available in the World Wide Web 
 - The World Wide Web, or "Web", is a network of websites (online documents coded in ```html``` and ```css```)
 - A **web scraper** is a program, for instance in  ```R ```, that automatically read the ```html``` structure of a website and extract the relevant content (text, hypertext references, tables)
+  - No need to fully understand ```html``` and ```css```
 - Useful when many pages to scrape
+
+:::
+:::
+
+## What is HTML and CSS?
+
+:::{.columns}
+:::{.column width="50%"}
+
+![](exemple_wikipedia.png){width=91% fig-align="center"}
+
+:::
+:::{.column width="50%"}
+:::{.fragment}
+
+![](exemple_html.png){width=88% fig-align="center"}
+
+:::
+:::
 :::
 
 ## API vs. web scraping
 
-:::{.incremental .highlight-last}
+:::{.incremental .highlight-last .small-text}
+:::{.fragment .nonincremental}
 - **API (Application Programming Interface)** provides a structured and predictable way to retrieve data from a service. It's like ordering from a menu; you request specific data and receive it in a structured format
+  - [Twitter API](https://developer.x.com/en/docs/x-api)
+  - [Wikidata API](https://www.wikidata.org/wiki/Wikidata:REST_API)
+  - API for bibliometric data like Scopus, Web of Science, Google Scholar...
+
+:::
 - Web Scraping is the process of programmatically extracting data from the web page's HTML itself. It's akin to manually copying information from a book; you decide what information you need and how to extract it
+
 :::
 
 ## API vs. web scraping
 
-:::{.incremental .highlight-last}
-- **Control and Structure**: APIs offer structured access to data, whereas web scraping requires parsin HTML and often cleaning the data yourself.
-- **Ease of Use**: Using an API can be simpler since it's designed for data access. Scraping requires dealing with HTML changes and is more prone to breaking.
+:::{.incremental .highlight-last .small-text}
+- **Control and Structure**: APIs offer structured access to data, whereas web scraping requires parsing HTML and often cleaning the data yourself.
+- **Ease of Use**: Using an API can be simpler since it's designed for data access (but not always the case). Scraping requires dealing with HTML changes and is more prone to breaking.
 - **Availability**: Not all websites offer an API, making web scraping a necessity in some cases.
-- **Limitations**: APIs often have rate limits and may require authentication. Web scraping can bypass these limits but might violate terms of service.
+- **Limitations and Authorization**: APIs often have rate limits and may require authentication, but approve access to the data. Web scraping can bypass these limits but might violate terms of service.
 :::
 
 
@@ -139,19 +159,56 @@ p_load(here)
 :::
 
 ::: {.notes}
+Examples of project:
+- Creating a database of central banks documents
+- Database of the meetings of commissioners
+- Prosopographic database: scraping public profiles, notably via LinkedIn.
+
+Other examples on our own research
+
 Do you have ideas of data you may be interested to collect? Why you did not do it?
+:::
+
+## Building databases {.smaller}
+
+### Involves a series of questions:
+:::{.incremental .highlight-last}
+ 
+- What's your research question and which data would be appropriate to answer it?
+- How much data to collect?
+  - Trade-off between collecting a lot of information (which requires more time) and risking to miss some information at a later step
+- How to scrape the data? In which format?
+  - Interaction between extracting data properly in a first step or cleaning it in a second step
+- What do you loose by doing it automatically rather than manually?
+- How to analyse/understand my new data?
+- How to update my database?
+
 :::
 
 # The Ethics of Web Scraping
 
-## Ethical considerations {.scrollable}
+## Ethical considerations
 
-:::{.incremental .highlight-last}
+:::{.incremental .highlight-last  .small-text}
 - **Legal Considerations**: Not all data is free to scrape. Websites' terms of service may explicitly forbid web scraping, and in some jurisdictions, scraping can have legal implications
   - What is "forbidden" by a website is not necessary "illegal"
 - **Privacy Concerns**: Scraping personal data can raise significant privacy issues and may be subject to regulations like GDPR in Europe
 - **Website Performance**: Scraping, especially if aggressive (e.g., making too many requests in a short period), can negatively impact the performance of a website, affecting its usability for others
 :::
+
+## Questions at stake [@krotov2020]
+
+![@krotov2020](legality_scraping.png){width=86% fig-align="center"}
+
+:::{.notes}
+- No legislation specific to web scraping exist.
+  - May be impossible to determine the legality of some scraping actions.
+- Uncertainty about violating the "terms of use" or "terms of service" is a "fraudulent" use of data. Often, should be motivated and not consider illegal as such. It has been also noted for instance that "Web Scraping publicly available data likely does not violate the CFAA".
+- Breach of contract: should have incurred material damages.
+- Trespass to chattels: when have incurred material damages.
+- Trade Secrets: when used to deliberate surveillance
+:::
+
 
 ## Ethical practices
 
@@ -168,7 +225,7 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 ## The useful packages in R
 
 :::{.incremental .highlight-last}
-- [rvest](https://rvest.tidyverse.org/): scraping and cleaning html code
+- [rvest](https://rvest.tidyverse.org/): navigating website, scraping and cleaning html code
 - [polite](https://dmi3kno.github.io/polite/): responsible web etiquette (informing the website that you are scraping)
 - [RSelenium](https://docs.ropensci.org/RSelenium/index.html): using a bot to interact with a website
 
@@ -178,12 +235,14 @@ p_load(rvest, # scraping and manipulating html pages
        polite, # scraping ethically
        RSelenium) # scraping by interacting with RSelenium
 ```
+
+- Additional tool to navigate ```html``` and ```css``` code: [SelectorGadget](https://selectorgadget.com/)  or [ScrapeMate](https://addons.mozilla.org/fr/firefox/addon/scrapemate/)
 :::
 :::
 
 ## Navigating the website
 
-:::{.incremental .highlight-last}
+:::{.incremental .highlight-last .small-text}
 
 ::: {.fragment}
 ```{r}
@@ -192,15 +251,16 @@ bis_website_path <- "https://www.bis.org/cbspeeches/index.htm"
 :::
 
 ::: {.fragment .nonincremental}
-- Two basic ways to scrape:
-  - Interacting with the website (the more complicated one, using RSelenium)
-  - Understanding/extracting the "structure" of URL (only need rvest in many cases)
+- Two basic ways to scrape a series of pages:
+  - Interacting with the website by using a bot browser (the more complicated one, using RSelenium)
+  - Understanding/extracting the "structure" of the website (only need rvest in many cases)
 :::
 
 ::: {.fragment .nonincremental}
 - Other cases in which you need to interact with the website
   - When you need to scroll to have the full content
   - When you need to open menus to display all the content
+  - When you need to type in a search bar
   
 :::
 :::
@@ -211,7 +271,7 @@ Page BIS: we will extract date, titles, etc... But we don't want just the first 
 
 ## The Role of Sitemaps
 
-:::{.incremental .highlight-last}
+:::{.incremental .highlight-last .small-text}
 - Sitemap: to inform search engines about URLs on a website that are available for web crawling
   - Understand the structure of a website
   - Find where is the information we want to extract
@@ -226,30 +286,37 @@ Page BIS: we will extract date, titles, etc... But we don't want just the first 
 :::
 :::
 
-## Being respectful of the website {.scrollable}
+## Being respectful of the website {.smaller .scrollable}
 
 ::: {.fragment}
 
 Declaring yourself:
 ```{r eval=TRUE}
 session <- polite::bow(bis_website_path, 
-                       user_agent = "polite R package - used for academic training by Aurélien Goutsmedt (aurelien.goutsmedt[at]uclouvain.be)")
+                       user_agent = "polite R package - used for academic training by 
+                       Aurélien Goutsmedt (aurelien.goutsmedt[at]uclouvain.be)")
 ```
 :::
 
 ::: {.fragment}
 ```{r eval=TRUE}
+#| output-location: fragment
 cat(session$robotstxt$text)
 ```
 :::
 
 ::: {.fragment}
 ```{r eval=TRUE}
+#| output-location: fragment
 session$robotstxt$sitemap
 ```
 :::
 
-## Using sitemap {.scrollable}
+:::{.notes}
+Visit the sitemap
+:::
+
+## Using sitemap {.scrollable .smaller}
 
 ```{r eval=TRUE}
 #| code-fold: true
@@ -264,7 +331,8 @@ extract_url_from_sitemap <- function(url, delay = 1) {
 }
 
 # insistently allows to retry when you did not succeed in loading the page
-insistently_extract_url <- insistently(extract_url_from_sitemap, rate = rate_backoff(max_times = 5)) 
+insistently_extract_url <- insistently(extract_url_from_sitemap, 
+                                       rate = rate_backoff(max_times = 5)) 
 
 document_pages <- extract_url_from_sitemap(session$robotstxt$sitemap$value) %>% 
   .[str_detect(., "documents")] # We keep only the URLs for documents
@@ -297,25 +365,70 @@ datatable(bis_pages,
   ")
 ```
 
-## Scraping a BIS speech with rvest
+## Scraping a BIS speech with rvest {.smaller .scrollable}
 
-"https://www.bis.org/review/r241010a.htm"
+:::{.fragment}
+```{r}
+#| output-location: fragment
+url_speech <- "https://www.bis.org/review/r241022f.htm"
+page <- read_html(url_speech)
+print(page)
+```
+:::
+
+:::{.fragment}
+```{r}
+#| output-location: fragment
+page %>% 
+  html_element("h1") %>%
+  html_text
+```
+
+:::
+
+:::{.fragment}
+```{r}
+#| output-location: fragment
+page %>% 
+  html_element("#extratitle-div p:nth-child(1)") %>% 
+  html_text
+```
+
+:::
+
+:::{.fragment}
+```{r}
+#| output-location: fragment
+page %>% 
+  html_elements(".Reden") %>% 
+  html_text
+```
+:::
 
 ## Scraping BIS: understanding URLs
 
-The second page of our query:  
+:::{.fragment .small-text}
+- Our query on the list of speeches:
 
-`https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2023&cbspeeches_page=2&cbspeeches_page_length=25`
+[https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25](https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25)
+:::
 
+:::{.fragment}
 ```{r}
+#| output-location: fragment
+#| code-line-numbers: "|5"
 page <- 2
 day <- "01"
 month <- "10"
-year <- 2024
+year <- 2024 # we want to look at all the speech since October 1st 2024
 url_second_page <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
+
+print(url_second_page)
 ```
+:::
 
 ::: {.notes}
+- Go to: "https://www.bis.org/cbspeeches/index.htm". Change date. Then display 25 speeches. And go to page 2.
 - Often you may use both rvest and Rselenium
 - Looking at the Website and the pattern of URL
 :::
@@ -334,7 +447,7 @@ url_second_page <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}
 First goes to the page and look at what a webpage looks like
 :::
 
-## Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
+## Scraping the query page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
 
 ```{r launching-bot}
 #| eval: false
@@ -358,6 +471,7 @@ Sys.sleep(session$delay)
 
 ::: {.fragment}
 ```{r element-date, eval=FALSE}
+#| output-location: fragment
 element <- remote_driver$findElement("css selector", ".item_date")
 element$getElementText()[[1]]
 ```
@@ -374,6 +488,7 @@ print(date)
 
 ::: {.fragment}
 ```{r all-elements, eval=FALSE}
+#| output-location: fragment
 elements <- remote_driver$findElements("css selector", ".item_date")
 length(elements)
 ```
@@ -383,8 +498,11 @@ length(elements)
 length <- 25
 print(length)
 ```
+:::
 
+::: {.fragment}
 ```{r extract-text, eval=FALSE}
+#| output-location: fragment
 elements[[25]]$getElementText()[[1]]
 ```
 
@@ -396,7 +514,7 @@ print(last_date)
 
 :::
 
-## Scraping one page {.scrollable}
+## Scraping one page {.smaller}
 
 ```{r scraping-page, eval=FALSE}
 #| code-fold: true
@@ -438,6 +556,7 @@ data_page %>%
 ```{r all-pages, eval=FALSE}
 starting_url <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page=1&cbspeeches_page_length=25")
 remote_driver$navigate(starting_url)
+
 # Extract the total number of pages
 nb_pages <- remote_driver$findElement("css selector", ".pageof")$getElementText()[[1]] %>%
   str_remove_all("Page 1 of ") %>%
@@ -467,12 +586,23 @@ driver$server$stop() # we close the bot once we've finished
 
 
 
-# Questions
+# Exercises
 
-# Useful Resources
+## Exercises
 
+:::{.incremental .highlight-last}
+- Easy exercise: Scraping the UK Election Results ([https://www.bbc.com/news/election/2024/uk/results](https://www.bbc.com/news/election/2024/uk/results))
+- Medium exercise: Scraping the state of EU legislation ([https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en](https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en))
+- Difficult exercise: Scraping the ECB occasional papers (["https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html"](https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html))
+:::
+
+# Resources
+
+## Useful Resources
 - [Basic R learning](https://r4ds.had.co.nz/)
 - [More advanced R learning](https://adv-r.hadley.nz/)
 - [Using GGraph](https://ggplot2-book.org/networks)
 - [Complementary package for network analysis](https://agoutsmedt.github.io/networkflow/)
 - [Good tutorial on scraping with RSelenium](https://www.rselenium-teaching.etiennebacher.com/#/title-slide)
+
+## References
