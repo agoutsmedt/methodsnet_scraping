@@ -1,5 +1,11 @@
 ######## Scraping BCE Occasional papers ##########
 
+# 25/10/2024 14h50 relecture Marine
+# EDIT qu'est ce qui est de l'énoncé et du corrigé? 
+# EDIT est ce qu'il ne ferait pas sens de tout mettre dans un dataframe?
+# A aucun moment on ne créait l'objet all_data, donc j'en est déduis qu'il manquait. 
+# Je l'ai ajouté.
+
 # Loading necessary packages for web scraping and text analysis
 pacman::p_load(tidyverse,     # Data manipulation
                rvest,         # Web scraping
@@ -11,7 +17,8 @@ pacman::p_load(tidyverse,     # Data manipulation
 ecb_domain <- "https://www.ecb.europa.eu/"
 # Create a polite session object for the ECB domain to ensure responsible scraping
 session <- polite::bow(ecb_domain, 
-                       user_agent = "polite R package - used for academic training by Marine Bardou (marine.bardou@uclouvain.be)")
+                       user_agent = "polite R package - used for academic training by Aurélien Goutsmedt (aurelien.goutsmedt@uclouvain.be)")
+#### EDIT: ai changé le nom (c'était Marine Bardou)
 
 # Here is the full path to the page listing occasional papers. 
 ecb_pub_path <- str_c(ecb_domain, "press/research-publications/occasional-papers/html/index.en.html")
@@ -36,9 +43,10 @@ pub_page <- browser$getPageSource()[[1]] %>%
   read_html()
 
 # We extract the paper identifiers (number) and look at them
-pub_page %>% 
+id <- pub_page %>% 
   html_elements(".category") %>% 
   html_text
+### EDIT: id n'étit pas assigné à un objet (il était uniquement mentionné dan sla fonction print ci dessous)
 
 print(id)
 # Obviously, we just have the first papers, and we need to scroll down to get all the papers
@@ -129,13 +137,24 @@ supplementary_information <- pub_page %>%
   filter(text != info_type) %>%  
   pivot_wider(names_from = info_type, values_from = text) # Reshape the data so each paper has its abstract, JEL codes, etc.
 
+# EDIT: put all the extracted information in a single data frame
+extracted_data <- tibble(date,
+                         id,
+                         title,
+                         url,
+                         authors)
+all_data <- left_join(extracted_data,
+                      supplementary_information,
+                      by = "id")
+
 ## Analyzing text from titles and abstracts ---------
 # Now we have all the papers, let's have a bit of analysis by looking at the most frequent terms in titles and abstracts
 
 # Defining a list of stop words to filter out from text analysis
+## EDIT: for that purpose, you can use lexicon == "SMART"
 stopwords <- stop_words %>% filter(lexicon == "SMART") %>% pull(word)
 
-# Unnest words from titles and count frequent terms (excluding stopwords)
+# Unnest words from titles and count frequent terms (i.e. excluding stopwords)
 all_data %>% 
   unnest_ngrams(word, title, n_min = 1, n = 3) %>%
   filter(! str_detect(word, str_c("\\b", stopwords, "\\b", collapse = "|"))) %>%
