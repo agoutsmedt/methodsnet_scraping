@@ -7,6 +7,7 @@
 # Je l'ai ajouté.
 
 # Loading necessary packages for web scraping and text analysis
+install.packages(pacman)
 pacman::p_load(tidyverse,     # Data manipulation
                rvest,         # Web scraping
                RSelenium,     # Automating browser interactions
