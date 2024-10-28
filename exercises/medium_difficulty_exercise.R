@@ -1,8 +1,6 @@
 ##### script medium exercise #####
 
 # Goal: 
-# TEST !!!! 
-# TEST 2 !!!!
 # You want to know what happened to the files which were EU legislative priorities in 2023-2024
 # So you want to know what is the state of play for different legislation packages. 
 
@@ -31,6 +29,7 @@ page <- read_html(url)
 name_procedure <- html_elements(page,css = ".ep-table-cell-xxl .ep_name") %>%
   html_text2() # Extract the text 
 # html_text2() allows also to clean by removing tabs and extra blank spaces. 
+# It is as well possible to withdraw specific characters like the ones for tabs. 
 
 # We still have some "\r" which is a code for returning to the beginning of the line. 
 # You can use two functions from the stringr package: str_remove_all() to remove all the "\r" and str_squish() to remove all the resulting extra white spaces.
