@@ -223,12 +223,15 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 # How to scrape a website? 
 
 ## What is R? 
+:::{.incremental .highlight-last}
 - programming language created at the end of 1990s for statistical computing 
 - free and open source
 - generally used in the development environment RStudio 
 
-### R basic concepts
+## R basic concepts {.scrollable}
+
 - **object**: like a box to which you assign a name and put various things in (from very simple to very complex)
+
 Here is how you create an object in R:
 ```{r}
 annas_age <- 26
@@ -236,6 +239,9 @@ annas_age
 names_organizers <- c("Aurélien", "Thomas", "Marine")
 names_organizers
 ```
+
+## R basic concepts {scrollable}
+
 - **data frame** (it is a specific type of object!): comparable to a spreadsheet
 ```{r}
 firstnames <- c("Anna", "Laura", "Lise")
@@ -250,18 +256,22 @@ my_data <- data.frame(firstnames,
                       discipline)
 my_data
 ```
+
+## R basic concepts {.scrollable}
+
 - **function**: a block of code to which you provide input and which returns an output 
 You can define yourself a function, but many are pre built. 
 ```{r}
 length(names_organizers)
 ```
+
 - **package**: most importantly, packages contain functions! 
 ```{r}
 library(stringr)
 str_detect(names_organizers, "Aurélien")
 ```
 
-##  The seful packages for webscraping in R
+##  Useful packages for webscraping in R
 
 :::{.incremental .highlight-last}
 - [rvest](https://rvest.tidyverse.org/): navigating website, scraping and cleaning html code
