@@ -3,15 +3,18 @@
 # from the BBC website (i.e, https://www.bbc.com/news/election/2024/uk/regions/E92000001), focusing on the following:
 # 1. The number of parties that won at least one seat.
 # 2. The parties that gained or lost seats.
-# 3. The average number of votes required per seat.
+# 3. The average number of votes per seat for the parties with at least one seat.
 # 4. Comparing these metrics between the entire UK and England specifically.
 
 # Step 1: Load necessary packages
 # We use the pacman package to manage dependencies and load required libraries in one command
-pacman::p_load(tidyverse, 
+install.packages(pacman)
+pacman::p_load(tidyverse,  # A collection of packages for data science
                rvest,      # For web scraping
                polite,     # To scrape politely
-               patchwork)  # For combining multiple plots
+               patchwork,  # For combining multiple plots
+               gridExtra # For arranging multiple tables or plots in a grid layout
+                        )
 
 # Step 2: Scrape Election Data for the UK
 
@@ -171,3 +174,23 @@ Figure_UK / Figure_EN &
   scale_x_continuous(limits = c(0, 840000), 
                      name = "Number of votes per seat", 
                      labels = scales::comma_format(big.mark = ' '))
+
+
+ # 8.3: Compare Winning and Losing Parties by Displaying The Results in Juxtaposed Tables
+
+# Create tables with grid_extra
+table_UK <- tableGrob(Election_EN %>%
+                          filter(change_seat!=0)%>%
+                          arrange(-change_seat) %>%
+                          select(-number_vote) %>%
+                          select(party,change_seat),rows = NULL)
+
+table_EN <-  tableGrob(Election_UK %>%
+                         filter(change_seat!=0)%>%
+                         arrange(-change_seat) %>%
+                         select(-number_vote) %>%
+                         select(party,change_seat),rows = NULL)
+# Combine the tables
+grid.arrange(table_UK, table_EN, ncol = 2, top = "Election Results Comparison",layout_matrix = rbind(c(1, 2)))
+
+             
