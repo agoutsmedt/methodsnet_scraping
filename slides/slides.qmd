@@ -1,7 +1,7 @@
 ---
 title: "Mastering Web Scraping for Data Collection"
 subtitle: "MethodsNET Workshop"
-author: "Marine Bardou, Aurélien Goutsmedt, and Thomas Laloux (UC Louvain)"
+author: "Aurélien Goutsmedt, Thomas Laloux and Marine Bardou (UCLouvain)"
 date: "10/31/2024"
 format:
   revealjs: 
@@ -45,7 +45,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 
 - Giving a basic understanding of what web scraping is and what it can do
 - Discussing ethical (and legal) issues linked to web scraping
-- Proposing a roadmap for understanding how to proceed for practising web scraping using R
+- Proposing a roadmap for understanding how to proceed for practicing web scraping using R
 - Providing bits of codes and practical tips
 
 <br> 
@@ -63,7 +63,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 ## Requisits
 
 :::{.incremental .highlight-last}
-- Need of R and RStudio for the second session
+- Need of R and RStudio for the second session (please make sure to install them!)
 - These slides are built from a ```.qmd``` (quarto) document $\Rightarrow$ all the codes used in these slides can be run in RStudio
 :::
 
@@ -147,15 +147,15 @@ p_load(here)
 :::
 
 
-## Small data everywhere
+## Forget about big data, small data is everywhere!
 
 :::{.incremental .highlight-last}
 - A large possibility of data you can collect:
   - official documents/speeches
   - agenda and meetings
   - list of personnel or experts in commission
-  - Laws or negotiations
-- We can do it "historically" through the [Internet Archive](http://web.archive.org/)
+  - laws or negotiations
+- To take into account the development of pages over time, we can do it through the [Internet Archive](http://web.archive.org/)
 :::
 
 ::: {.notes}
@@ -164,7 +164,7 @@ Examples of project:
 - Database of the meetings of commissioners
 - Prosopographic database: scraping public profiles, notably via LinkedIn.
 
-Other examples on our own research
+Other examples on our own research?
 
 Do you have ideas of data you may be interested to collect? Why you did not do it?
 :::
@@ -179,7 +179,7 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
   - Trade-off between collecting a lot of information (which requires more time) and risking to miss some information at a later step
 - How to scrape the data? In which format?
   - Interaction between extracting data properly in a first step or cleaning it in a second step
-- What do you loose by doing it automatically rather than manually?
+- What do you loose by doing it automatically rather than manually? (or the reverse)
 - How to analyse/understand my new data?
 - How to update my database?
 
@@ -203,10 +203,10 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 :::{.notes}
 - No legislation specific to web scraping exist.
   - May be impossible to determine the legality of some scraping actions.
-- Uncertainty about violating the "terms of use" or "terms of service" is a "fraudulent" use of data. Often, should be motivated and not consider illegal as such. It has been also noted for instance that "Web Scraping publicly available data likely does not violate the CFAA".
+- Uncertainty about violating the "terms of use" or "terms of service" is a "fraudulent" use of data. Often, should be motivated and not consider illegal as such. It has been also noted for instance that "Web Scraping publicly available data likely does not violate the CFAA". (CFAA = Computer Fraud and Abuse Act)
 - Breach of contract: should have incurred material damages.
 - Trespass to chattels: when have incurred material damages.
-- Trade Secrets: when used to deliberate surveillance
+- Trade Secrets: when used for deliberate surveillance
 :::
 
 
@@ -221,6 +221,45 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 :::
 
 # How to scrape a website? 
+
+## What is R? 
+- programming language created at the end of 1990s for statistical computing 
+- free and open source
+- generally used in the development environment RStudio 
+
+### R basic concepts
+- **object**: like a box to which you assign a name and put various things in (from very simple to very complex)
+Here is how you create an object in R:
+```{r}
+annas_age <- 26
+annas_age
+names_organizers <- c("Aurélien", "Thomas", "Marine")
+names_organizers
+```
+- **data frame** (it is a specific type of object!): comparable to a spreadsheet
+```{r}
+firstnames <- c("Anna", "Laura", "Lise")
+firstnames
+ages <- c(26,28,25)
+ages
+discipline <- c("maths", "sociology", "law")
+discipline
+
+my_data <- data.frame(firstnames, 
+                      ages, 
+                      discipline)
+my_data
+```
+- **function**: a block of code to which you provide input and which returns an output 
+You can define yourself a function, but many are pre built. 
+```{r}
+length(names_organizers)
+```
+- **package**: most importantly, packages contain functions! 
+```{r}
+library(stringr)
+str_detect(names_organizers, "Aurélien")
+```
 
 ## The useful packages in R
 
@@ -257,10 +296,10 @@ bis_website_path <- "https://www.bis.org/cbspeeches/index.htm"
 :::
 
 ::: {.fragment .nonincremental}
-- Other cases in which you need to interact with the website
+- Cases in which you need to interact with the website
   - When you need to scroll to have the full content
   - When you need to open menus to display all the content
-  - When you need to type in a search bar
+  - When you need to type in a search bar and run a search
   
 :::
 :::
@@ -596,11 +635,93 @@ driver$server$stop() # we close the bot once we've finished
 - Difficult exercise: Scraping the ECB occasional papers (["https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html"](https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html))
 :::
 
+## Medium exercise 
+You want to know what happened to the files which were EU legislative priorities in 2023-2024
+
+**1. Scrape the basic information**
+We are going to list all relevant procedures.
+In the EU, once proposed each piece of legislation has a procedure number, including 'COD'. 
+Go to this page that lists the legislative files which were priorities for 2023-24: https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en 
+You have to scrape this page to obtain a data frame, in which there will be the title, number and url towards the specific page of each procedure
+
+Check one or two links - can you copy paste them in a browser and access the page?
+Is there anything missing in the URL? How could you fix this?
+Search manually a procedure here to find out how urls are made: https://oeil.secure.europarl.europa.eu/oeil/search/search.do?searchTab=y
+Tip: you can use the paste function 
+
+## Medium exercise part 2
+**2. Filter only the procedures of interest**
+Now you have listed the names of all relevant procedures, and the links to access them.
+You are only interest in procedures having COD in their name. 
+Create a data frame that contains only procedure with 'COD' in their number. 
+Tip: you can use the the str_detect() function of stringr.
+
+## Medium exercise part 3
+**3. Scrape a single page**
+Take this single URL link: https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en
+It is one of the ones you have listed
+In a separate data frame (which will have only one line, and three columns), scrape:
+- the status of the procedure (i.e. at which stage it is)
+- the date at which the legislative file was published
+- the date at which the EP took its decision
+
+**3.a.** Status of the procedure (observe: here the css selector is very "human readable")
+**3.b.** Date of publication of legislative proposal
+Tip: first, select all the dates. 
+Then, select the names of all the events to which they correspond. 
+Finally, select your event of interest with grepl (use for example "proposal")
+**3.c** Date of EP decision
+**3.d.** Put everything in tibble
+
+## Medium exercise part 4
+4. **Writing a function**
+Write a function that automates the scraping you did at question 3. (generalize your code!). 
+For each URL, the function has to scrape the same three pieces of information. 
+Run that function and store the results in a data frame that also contains the number of the procedures and their URLs.
+
+**4.a** Write the function. You can find explanations about creating a function in R here: 
+https://www.r-bloggers.com/2022/04/how-to-create-your-own-functions-in-r/
+
+Tip: In the function, you can use the tibble() function to bind the different information together
+At the end, write return(created_data_frame). This indicates to R that it is the output of the function. 
+
+Tip: some of the info you are looking for may not be on all pages. 
+Use the function length() to check whether your code found something, and write "To check" if the information is not found. 
+Why is some info missing on some pages?
+
+**4.b** Test the function. To do this, run the function on one of the links (only one!)
+
+**4.c** Run the function. Use as input the list of URLs that you made previously. 
+You will need to use the lapply() function to apply you function to this list of URLs.
+We can test this on the ten first links
+Once you ran the function, you need to bind the results together by "horizontally" (i.e. above each other)
+Otherwise, you just have a list of separate data frames for each procedure. 
+Which R function allows you to do this?
+You can use bind_rows() from dplyr to aggregate all the tibbles.
+
+**4.d** Bind the results of your scraping with your original dataframe containing the links. 
+Tip: we can do a bind_col() because here, we are sure that our input links (and procedures) are in the same order as the results.
+Otherwise, more generally, it is preferable to have a common identifier in each table and to use a join function.
+
+## Medium exercise part 5
+5. **Explore the data**
+
+**5.a** Calculate the duration of each legislative process (in days) in a new column of your data frame. 
+Calculate it as the number of days between the legislative proposal and the EP decision.
+Tip: you have to tell R that you are working with dates. 
+Search which function allows to do this!
+
+**5.b** What happens to the cases where the date of EP decision is not yet available?
+Pay attention when calculating the duration!
+
+**5.c** Let's look for the longer process. When did that procedure start?
+
 # Resources
 
 ## Useful Resources
 - [Basic R learning](https://r4ds.had.co.nz/)
 - [More advanced R learning](https://adv-r.hadley.nz/)
+- [Starting with web scraping] (https://practicewebscrapingsite.wordpress.com/)
 - [Using GGraph](https://ggplot2-book.org/networks)
 - [Complementary package for network analysis](https://agoutsmedt.github.io/networkflow/)
 - [Good tutorial on scraping with RSelenium](https://www.rselenium-teaching.etiennebacher.com/#/title-slide)
