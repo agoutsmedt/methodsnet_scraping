@@ -1,6 +1,7 @@
 ##### script medium exercise #####
 
 # Goal: 
+# TEST !!!! 
 # You want to know what happened to the files which were EU legislative priorities in 2023-2024
 # So you want to know what is the state of play for different legislation packages. 
 
