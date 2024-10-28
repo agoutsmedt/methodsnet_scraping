@@ -223,10 +223,13 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 # How to scrape a website? 
 
 ## What is R? 
+
 :::{.incremental .highlight-last}
 - programming language created at the end of 1990s for statistical computing 
 - free and open source
 - generally used in the development environment RStudio 
+
+:::
 
 ## R basic concepts {.scrollable}
 
@@ -240,7 +243,7 @@ names_organizers <- c("Aurélien", "Thomas", "Marine")
 names_organizers
 ```
 
-## R basic concepts {scrollable}
+## R basic concepts {.scrollable}
 
 - **data frame** (it is a specific type of object!): comparable to a spreadsheet
 ```{r}
@@ -257,7 +260,7 @@ my_data <- data.frame(firstnames,
 my_data
 ```
 
-## R basic concepts {.scrollable}
+## R basic concepts 
 
 - **function**: a block of code to which you provide input and which returns an output 
 You can define yourself a function, but many are pre built. 
@@ -692,93 +695,99 @@ driver$server$stop() # we close the bot once we've finished
 
 
 
-## Medium exercise 
+## Medium exercise part 1
 You want to know what happened to the files which were EU legislative priorities in 2023-2024
 
+:::{.small-text .scrollable}
 **1. Scrape the basic information**
-We are going to list all relevant procedures.
-In the EU, once proposed each piece of legislation has a procedure number, including 'COD'. 
+
+We are going to list all relevant procedures. In the EU, once proposed each piece of legislation has a procedure number, including 'COD'. 
+
 Go to this page that lists the legislative files which were priorities for 2023-24: https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en 
+
 You have to scrape this page to obtain a data frame, in which there will be the title, number and url towards the specific page of each procedure
 
 Check one or two links - can you copy paste them in a browser and access the page?
 Is there anything missing in the URL? How could you fix this?
-Search manually a procedure here to find out how urls are made: https://oeil.secure.europarl.europa.eu/oeil/search/search.do?searchTab=y
-Tip: you can use the paste function 
+Search manually a procedure to find out how urls are made: https://oeil.secure.europarl.europa.eu/oeil/search/search.do?searchTab=y
+
+Tip: you can use the `paste()` function. 
+:::
 
 ## Medium exercise part 2
+
+:::{.small-text .scrollable}
 **2. Filter only the procedures of interest**
 Now you have listed the names of all relevant procedures, and the links to access them.
 You are only interest in procedures having COD in their name. 
 Create a data frame that contains only procedure with 'COD' in their number. 
-Tip: you can use the the str_detect() function of stringr.
+
+Tip: you can use the the `str_detect()` function of `stringr`.
+:::
 
 ## Medium exercise part 3
+
+:::{.small-text .scrollable}
 **3. Scrape a single page**
-Take this single URL link: https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en
+Take this single URL link: https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en. 
 It is one of the ones you have listed
+
 In a separate data frame (which will have only one line, and three columns), scrape:
 - the status of the procedure (i.e. at which stage it is)
 - the date at which the legislative file was published
 - the date at which the EP took its decision
 
-**3.a.** Status of the procedure (observe: here the css selector is very "human readable")
-**3.b.** Date of publication of legislative proposal
-Tip: first, select all the dates. 
+Tip: for the dates first, select all the dates. 
 Then, select the names of all the events to which they correspond. 
-Finally, select your event of interest with grepl (use for example "proposal")
-**3.c** Date of EP decision
-**3.d.** Put everything in tibble
+Finally, select your event of interest with `grepl()` (use for example "proposal")
+
+:::
 
 ## Medium exercise part 4
-4. **Writing a function**
+
+:::{.small-text .scrollable}
+**4. Writing a function**
 Write a function that automates the scraping you did at question 3. (generalize your code!). 
 For each URL, the function has to scrape the same three pieces of information. 
 Run that function and store the results in a data frame that also contains the number of the procedures and their URLs.
 
-**4.a** Write the function. You can find explanations about creating a function in R here: 
+Tips: explanations about creating a function in R here: 
 https://www.r-bloggers.com/2022/04/how-to-create-your-own-functions-in-r/
 
-Tip: In the function, you can use the tibble() function to bind the different information together
-At the end, write return(created_data_frame). This indicates to R that it is the output of the function. 
+In the function, you can use the `tibble()` function to bind the different information together.
 
-Tip: some of the info you are looking for may not be on all pages. 
+At the end, use `return()`. This indicates to R that it is the output of the function. 
+
+When applying the function, you may find the `lapply()` function useful!
+
+Don't hesitate to test the function on one or a handful of URLs! 
+
+Some of the info you are looking for may not be on all pages. 
 Use the function length() to check whether your code found something, and write "To check" if the information is not found. 
 Why is some info missing on some pages?
-
-**4.b** Test the function. To do this, run the function on one of the links (only one!)
-
-**4.c** Run the function. Use as input the list of URLs that you made previously. 
-You will need to use the lapply() function to apply you function to this list of URLs.
-We can test this on the ten first links
-Once you ran the function, you need to bind the results together by "horizontally" (i.e. above each other)
-Otherwise, you just have a list of separate data frames for each procedure. 
-Which R function allows you to do this?
-You can use bind_rows() from dplyr to aggregate all the tibbles.
-
-**4.d** Bind the results of your scraping with your original dataframe containing the links. 
-Tip: we can do a bind_col() because here, we are sure that our input links (and procedures) are in the same order as the results.
-Otherwise, more generally, it is preferable to have a common identifier in each table and to use a join function.
+:::
 
 ## Medium exercise part 5
-5. **Explore the data**
 
-**5.a** Calculate the duration of each legislative process (in days) in a new column of your data frame. 
-Calculate it as the number of days between the legislative proposal and the EP decision.
+**5. Explore the data**
+
+:::{.small-text .scrollable}
+**Duration** Calculate the number of days between the legislative proposal and the EP decision in a new column of your data frame. 
+
 Tip: you have to tell R that you are working with dates. 
 Search which function allows to do this!
 
-**5.b** What happens to the cases where the date of EP decision is not yet available?
-Pay attention when calculating the duration!
+**Missing data** What happens to the cases where the date of EP decision is not yet available? Pay attention when calculating the duration!
 
-**5.c** Let's look for the longer process. When did that procedure start?
+**Spotting specific cases** Let's look for the longer process. When did that procedure start?
+:::
 
 # Resources
 
-## Useful Resources
+## Useful resources
 - [Basic R learning](https://r4ds.had.co.nz/)
 - [More advanced R learning](https://adv-r.hadley.nz/)
-- [Starting with web scraping] (https://practicewebscrapingsite.wordpress.com/)
+- [Starting with web scraping](https://practicewebscrapingsite.wordpress.com/)
 - [Using GGraph](https://ggplot2-book.org/networks)
 - [Complementary package for network analysis](https://agoutsmedt.github.io/networkflow/)
 - [Good tutorial on scraping with RSelenium](https://www.rselenium-teaching.etiennebacher.com/#/title-slide)
