@@ -7,7 +7,7 @@
 # Je l'ai ajouté.
 
 # Loading necessary packages for web scraping and text analysis
-install.packages(pacman)
+# If necessary: `install.packages("pacman")`
 pacman::p_load(tidyverse,     # Data manipulation
                rvest,         # Web scraping
                RSelenium,     # Automating browser interactions
@@ -27,7 +27,8 @@ ecb_pub_path <- str_c(ecb_domain, "press/research-publications/occasional-papers
 
 ## Setting up RSelenium for browser automation ---------
 # Start a Firefox browser session for interacting with the webpage
-remDr <- rsDriver(browser = "firefox", port = 4444L, chromever = NULL)
+
+if(browser == "firefox") remDr <- rsDriver(browser = "firefox", port = 4444L, chromever = NULL)
 browser <- remDr[["client"]]
 
 # Navigate to the ECB publication page
