@@ -261,7 +261,7 @@ library(stringr)
 str_detect(names_organizers, "Aurélien")
 ```
 
-## The useful packages in R
+##  The seful packages for webscraping in R
 
 :::{.incremental .highlight-last}
 - [rvest](https://rvest.tidyverse.org/): navigating website, scraping and cleaning html code
@@ -403,6 +403,14 @@ datatable(bis_pages,
     }
   ")
 ```
+
+## Scraping a BIS speech with rvest {.smaller .scrollable}
+
+![Example of Speech](text_BIS.png){width=86% fig-align="center"}
+
+## Scraping a BIS speech with rvest {.smaller .scrollable}
+
+![Example of Speech](title.png){width=86% fig-align="center"}
 
 ## Scraping a BIS speech with rvest {.smaller .scrollable}
 
@@ -634,6 +642,45 @@ driver$server$stop() # we close the bot once we've finished
 - Medium exercise: Scraping the state of EU legislation ([https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en](https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en))
 - Difficult exercise: Scraping the ECB occasional papers (["https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html"](https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html))
 :::
+
+## Easy exercise 
+
+- **You want to scrape and analyze results of the 2024 UK General Election from the BBC website.**
+
+:::{.incremental .highlight-last .small-text}
+- Objectives:
+  - Count the number of parties with at least one seat.
+  - Determine which parties won or lost compared with the previous election.
+  - Calculate and visualize the average votes per seat for each parties with at least one seat.
+  - Compare findings for the entire UK vs. England.
+  
+:::
+:::
+
+## Easy exercise {.smaller}  
+
+- **Approach**
+
+
+:::{.incremental .highlight-last .small-text}
+
+
+ 1. Use the rvest and polite packages to retrieve data from the BBC website for party names, seats, votes, and seat changes for all parties in the UK.
+ 
+ 2. Organize data into a dataframe and clean it. Converte seat and vote counts to numeric and remove extraneous symbols.
+
+ 3. Analysis:
+  
+  - Count number of parties with at least one seat.
+  - Order the parties according to seat gains/losses.
+  - Calculate votes per seat for each party with a least one seat.
+  - Plot the number of votes per seat for all parties with a least one seat
+
+ 4. Repeat the  process for parties in England and then compare the results between the UK and England.
+
+:::
+
+
 
 ## Medium exercise 
 You want to know what happened to the files which were EU legislative priorities in 2023-2024
