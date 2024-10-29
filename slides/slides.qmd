@@ -704,7 +704,7 @@ driver$server$stop() # we close the bot once we've finished
   - Calculate votes per seat for each party with a least one seat.
   - Plot the number of votes per seat for all parties with a least one seat
 
- 4. Repeat the  process for parties in England and then compare the results between the UK and England.
+ 4. Repeat the  process for England and then compare the results between the UK and England.
 
 :::
 
