@@ -118,7 +118,7 @@ my_first_scrap <- tibble(procedure_status = procedure_status,
 # For each URL, the function has to scrape the same three pieces of information. 
 # Run that function and store the results in a data frame that also contains the number of the procedures and their URLs.
 
-# 5.a Write the function. You can find explanations about creating a function in R here: 
+# 4.a Write the function. You can find explanations about creating a function in R here: 
 # https://www.r-bloggers.com/2022/04/how-to-create-your-own-functions-in-r/
 
 # Tip: In the function, you can use the tibble() function to bind the different information together
@@ -167,10 +167,10 @@ scraping_all_pages <- function (url) {
 }  
 
 
-# 5.b Test the function. To do this, run the function on one of the links (only one!)
+# 4.b Test the function. To do this, run the function on one of the links (only one!)
 scraping_all_pages(my_procedures_cod$link[129])
 
-# 5.c Run the function. Use as input the list of URLs that you made previously. 
+# 4.c Run the function. Use as input the list of URLs that you made previously. 
 # You will need to use the lapply() function to apply you function to this list of URLs.
 # We can test this on the ten first links
 results <- lapply(my_procedures_cod$link[1:10], scraping_all_pages)
@@ -181,14 +181,14 @@ results <- lapply(my_procedures_cod$link[1:10], scraping_all_pages)
 my_results_clean <- results %>% 
   bind_rows()
 
-# 5.d Bind the results of your scraping with your original dataframe containing the links. 
+# 4.d Bind the results of your scraping with your original dataframe containing the links. 
 # Tip: we can do a bind_col() because here, we are sure that our input links (and procedures) are in the same order as the results.
 # Otherwise, more generally, it is preferable to have a common identifier in each table and to use a join function.
 my_results_complete <- my_procedures_cod %>% 
   join(my_results_clean, by = "link")
 
 
-# 6. Calculate the duration of each legislative process (in days) in a new column of your data frame. 
+# 5. Calculate the duration of each legislative process (in days) in a new column of your data frame. 
 # Calculate it as the number of days between the legislative proposal and the EP decision.
 # Tip: you have to tell R that you are working with dates. 
 # Search which function allows to do this!
@@ -204,4 +204,4 @@ my_results_complete$duration_legislative_process<- my_results_complete$date_EP_d
 max(my_results_complete$duration_legislative_process, 
     na.rm = TRUE)
 my_results_complete$link[which.max(my_results_complete$duration_legislative_process)]
-# So When did the procedure start?
+# When did the earlier procedure start?
