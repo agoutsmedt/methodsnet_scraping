@@ -1,3 +1,4 @@
+
 ---
 title: "Mastering Web Scraping for Data Collection"
 subtitle: "MethodsNET Workshop"
@@ -38,6 +39,9 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 # Training Goals
 
 ## Motivations {.smaller}
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.incremental .highlight-last}
 
@@ -62,6 +66,10 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 :::
 
 ## Requisits
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
+
 
 :::{.incremental .highlight-last}
 - Need of R and RStudio for the second session (please make sure to install them!)
@@ -94,6 +102,11 @@ p_load(here)
 # What is web Scraping
 
 ## What is web scraping ?
+::: {.notes}
+**Slide presenter**
+QUI FAIT CETTE SLIDE?
+:::
+
 
 :::{.incremental .highlight-last}
 :::{.small-text}
@@ -107,6 +120,9 @@ p_load(here)
 :::
 
 ## What is HTML and CSS?
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.columns}
 :::{.column width="50%"}
@@ -124,6 +140,9 @@ p_load(here)
 :::
 
 ## API vs. web scraping
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.incremental .highlight-last .small-text}
 :::{.fragment .nonincremental}
@@ -138,6 +157,10 @@ p_load(here)
 :::
 
 ## API vs. web scraping
+::: {.notes}
+**Slide presenter**
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.incremental .highlight-last .small-text}
 - **Control and Structure**: APIs offer structured access to data, whereas web scraping requires parsing HTML and often cleaning the data yourself.
@@ -148,6 +171,11 @@ p_load(here)
 
 
 ## Forget about big data, small data is everywhere!
+::: {.notes}
+**Slide presenter**
+QUI FAIT CETTE SLIDE?
+-> si besoin Marine peut faire
+:::
 
 :::{.incremental .highlight-last}
 - A large possibility of data you can collect:
@@ -172,6 +200,11 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 ## Building databases {.smaller}
 
 ### Involves a series of questions:
+::: {.notes}
+**Slide presenter**
+QUI FAIT CETTE SLIDE?
+-> si besoin Marine peut faire
+:::
 :::{.incremental .highlight-last}
  
 - What's your research question and which data would be appropriate to answer it?
@@ -188,6 +221,10 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 # The Ethics of Web Scraping
 
 ## Ethical considerations
+::: {.notes}
+**Slide presenter**
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.incremental .highlight-last  .small-text}
 - **Legal Considerations**: Not all data is free to scrape. Websites' terms of service may explicitly forbid web scraping, and in some jurisdictions, scraping can have legal implications
@@ -197,6 +234,10 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 :::
 
 ## Questions at stake [@krotov2020]
+::: {.notes}
+**Slide presenter**
+QUI FAIT CETTE SLIDE?
+:::
 
 ![@krotov2020](legality_scraping.png){width=86% fig-align="center"}
 
@@ -211,6 +252,10 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 
 
 ## Ethical practices
+::: {.notes}
+**Slide presenter**
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.incremental .highlight-last}
 - **Respect ```robots.txt```**: This file on websites indicates which parts should not be scraped
@@ -223,6 +268,10 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 # How to scrape a website? 
 
 ## What is R? 
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 :::{.incremental .highlight-last}
 - Programming language created at the end of 1990s for statistical computing 
@@ -233,6 +282,10 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 :::
 
 ## R basic concepts 
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 :::{.incremental .highlight-last .small-text}
 - **object**: like a box to which you assign a name and put various things in
@@ -269,6 +322,10 @@ my_data
 :::
 
 ## R basic concepts 
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 :::{.incremental .highlight-last}
 - **function**: a block of code to which you provide input and which returns an output. You can define yourself a function, but many are pre built. 
@@ -292,6 +349,10 @@ str_detect(firstnames, "Anna")
 :::
 
 ##  Useful packages for webscraping in R
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 :::{.incremental .highlight-last}
 - [rvest](https://rvest.tidyverse.org/): navigating website, scraping and cleaning ```html``` code
@@ -310,6 +371,10 @@ p_load(rvest, # scraping and manipulating html pages
 :::
 
 ## Navigating the website
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 :::{.incremental .highlight-last .small-text}
 
@@ -339,6 +404,9 @@ Page BIS: we will extract date, titles, etc... But we don't want just the first 
 :::
 
 ## The Role of Sitemaps
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.incremental .highlight-last .small-text}
 - Sitemap: to inform search engines about URLs on a website that are available for web crawling
@@ -356,7 +424,9 @@ Page BIS: we will extract date, titles, etc... But we don't want just the first 
 :::
 
 ## Being respectful of the website {.smaller .scrollable}
-
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 ::: {.fragment}
 
 Declaring yourself:
@@ -386,6 +456,9 @@ Visit the sitemap
 :::
 
 ## Using sitemap {.scrollable .smaller}
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 ```{r eval=TRUE}
 #| code-fold: true
@@ -435,6 +508,10 @@ datatable(bis_pages,
 ```
 
 ## The key steps of web scraping 
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 There are many ways to scrape, but your baseline scenario is:
 
@@ -450,10 +527,18 @@ There are many ways to scrape, but your baseline scenario is:
 :::
 
 ## Scraping a BIS speech with rvest 
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 ![[https://www.bis.org/review/r241022f.htm](https://www.bis.org/review/r241022f.htm)](text_BIS.png){width=86% fig-align="center"}
 
 ## Scraping one page: using a scrape helper
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 :::{.incremental .highlight-last}
 - Scraping add-ons on browser help you navigating through elements in a webpage
@@ -476,6 +561,10 @@ Rather use directly scrapemate in the browser to show them
 :::
 
 ## Scraping a BIS speech with rvest {.smaller .scrollable}
+::: {.notes}
+**Slide presenter**
+Marine
+:::
 
 :::{.fragment}
 ```{r}
@@ -516,6 +605,9 @@ page %>%
 :::
 
 ## Scraping BIS: understanding URLs
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 :::{.fragment .small-text}
 - Our query on the list of speeches: [https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25](https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25)
@@ -543,6 +635,10 @@ print(url_second_page)
 
 ## Scraping the query page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
 
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
+
 ```{r launching-bot}
 #| eval: false
 # Launch Selenium to go on the website of bis
@@ -553,6 +649,10 @@ remote_driver <- driver[["client"]]
 ```
 
 ## Scraping one page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
+
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 ::: {.fragment}
 ```{r navigating, eval=FALSE}
@@ -609,6 +709,9 @@ print(last_date)
 :::
 
 ## Scraping one page {.smaller}
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 ```{r scraping-page, eval=FALSE}
 #| code-fold: true
@@ -646,6 +749,9 @@ data_page %>%
 
 
 ## Scraping all the pages {.smaller}
+::: {.notes}
+QUI FAIT CETTE SLIDE?
+:::
 
 ```{r all-pages, eval=FALSE}
 starting_url <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page=1&cbspeeches_page_length=25")
