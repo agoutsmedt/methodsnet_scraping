@@ -1,11 +1,5 @@
 ######## Scraping BCE Occasional papers ##########
 
-# 25/10/2024 14h50 relecture Marine
-# EDIT qu'est ce qui est de l'énoncé et du corrigé? 
-# EDIT est ce qu'il ne ferait pas sens de tout mettre dans un dataframe?
-# A aucun moment on ne créait l'objet all_data, donc j'en est déduis qu'il manquait. 
-# Je l'ai ajouté.
-
 # Loading necessary packages for web scraping and text analysis
 # If necessary: `install.packages("pacman")`
 pacman::p_load(tidyverse,     # Data manipulation
@@ -28,7 +22,7 @@ ecb_pub_path <- str_c(ecb_domain, "press/research-publications/occasional-papers
 ## Setting up RSelenium for browser automation ---------
 # Start a Firefox browser session for interacting with the webpage
 
-if(browser == "firefox") remDr <- rsDriver(browser = "firefox", port = 4444L, chromever = NULL)
+remDr <- rsDriver(browser = "firefox", port = 4444L, chromever = NULL)
 browser <- remDr[["client"]]
 
 # Navigate to the ECB publication page
@@ -48,8 +42,6 @@ pub_page <- browser$getPageSource()[[1]] %>%
 id <- pub_page %>% 
   html_elements(".category") %>% 
   html_text
-### EDIT: id n'étit pas assigné à un objet (il était uniquement mentionné dan sla fonction print ci dessous)
-
 print(id)
 # Obviously, we just have the first papers, and we need to scroll down to get all the papers
 
@@ -139,7 +131,7 @@ supplementary_information <- pub_page %>%
   filter(text != info_type) %>%  
   pivot_wider(names_from = info_type, values_from = text) # Reshape the data so each paper has its abstract, JEL codes, etc.
 
-# EDIT: put all the extracted information in a single data frame
+# Put all the extracted information in a single data frame
 extracted_data <- tibble(date,
                          id,
                          title,
@@ -153,7 +145,7 @@ all_data <- left_join(extracted_data,
 # Now we have all the papers, let's have a bit of analysis by looking at the most frequent terms in titles and abstracts
 
 # Defining a list of stop words to filter out from text analysis
-## EDIT: for that purpose, you can use lexicon == "SMART"
+## for that purpose, you can use lexicon == "SMART"
 stopwords <- stop_words %>% filter(lexicon == "SMART") %>% pull(word)
 
 # Unnest words from titles and count frequent terms (i.e. excluding stopwords)

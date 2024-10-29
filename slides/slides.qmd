@@ -2,7 +2,7 @@
 title: "Mastering Web Scraping for Data Collection"
 subtitle: "MethodsNET Workshop"
 author: "Aurélien Goutsmedt, Thomas Laloux and Marine Bardou (UCLouvain)"
-date: "10/31/2024"
+date: "11/01/2024"
 format:
   revealjs: 
     theme: 
@@ -45,7 +45,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 
 - Giving a basic understanding of what web scraping is and what it can do
 - Discussing ethical (and legal) issues linked to web scraping
-- Proposing a roadmap for understanding how to proceed for practicing web scraping using R
+- Proposing a roadmap for understanding how to proceed for practising web scraping using R
 - Providing bits of codes and practical tips
 
 <br> 
@@ -58,6 +58,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 
 ::: {.notes}
 
+- Second session: even if no particular knowledge of R, you can try your hand on it and we'll be able to guide you.
 :::
 
 ## Requisits
@@ -67,13 +68,12 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRU
 - These slides are built from a ```.qmd``` (quarto) document $\Rightarrow$ all the codes used in these slides can be run in RStudio
 :::
 
-::: {.fragment}
+::: {.fragment .small-text}
 ```{r installing-packages}
 # These lines of code has to be run before if you want to install all the packages directly
 
 # pacman will be used to install (if necessary) and load packages
-# We install pacman if it is not already installed
-if(length(grep("pacman", installed.packages())) == 0) install.packages("pacman")
+if(length(grep("pacman", installed.packages())) == 0) install.packages("pacman") # check if installed
 library(pacman)
 
 # Installing the needed packages in advance
@@ -225,59 +225,76 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 ## What is R? 
 
 :::{.incremental .highlight-last}
-- programming language created at the end of 1990s for statistical computing 
-- free and open source
-- generally used in the development environment RStudio 
+- Programming language created at the end of 1990s for statistical computing 
+- Free and open source
+- Enriched by a large set of packages
+- Generally used in the development environment RStudio 
 
 :::
 
-## R basic concepts {.scrollable}
+## R basic concepts 
 
-- **object**: like a box to which you assign a name and put various things in (from very simple to very complex)
-
-Here is how you create an object in R:
-```{r}
-annas_age <- 26
-annas_age
-names_organizers <- c("Aurélien", "Thomas", "Marine")
-names_organizers
-```
-
-## R basic concepts {.scrollable}
-
+:::{.incremental .highlight-last .small-text}
+- **object**: like a box to which you assign a name and put various things in
 - **data frame** (it is a specific type of object!): comparable to a spreadsheet
+
+:::{.fragment}
 ```{r}
+#| output-location: fragment
 firstnames <- c("Anna", "Laura", "Lise")
 firstnames
+```
+:::
+:::{.fragment}
+```{r}
+#| output-location: fragment
 ages <- c(26,28,25)
 ages
+```
+:::
+:::{.fragment}
+```{r}
+#| output-location: fragment
 discipline <- c("maths", "sociology", "law")
 discipline
-
-my_data <- data.frame(firstnames, 
-                      ages, 
-                      discipline)
+```
+:::
+:::{.fragment}
+```{r}
+#| output-location: fragment
+my_data <- data.frame(firstnames, ages, discipline)
 my_data
 ```
+:::
+:::
 
 ## R basic concepts 
 
-- **function**: a block of code to which you provide input and which returns an output 
-You can define yourself a function, but many are pre built. 
+:::{.incremental .highlight-last}
+- **function**: a block of code to which you provide input and which returns an output. You can define yourself a function, but many are pre built. 
+
+:::{.fragment}
 ```{r}
-length(names_organizers)
+#| output-location: fragment
+length(firstnames)
 ```
+:::
 
 - **package**: most importantly, packages contain functions! 
+
+:::{.fragment}
 ```{r}
+#| output-location: fragment
 library(stringr)
-str_detect(names_organizers, "Aurélien")
+str_detect(firstnames, "Anna")
 ```
+:::
+:::
 
 ##  Useful packages for webscraping in R
 
 :::{.incremental .highlight-last}
-- [rvest](https://rvest.tidyverse.org/): navigating website, scraping and cleaning html code
+- [rvest](https://rvest.tidyverse.org/): navigating website, scraping and cleaning ```html``` code
 - [polite](https://dmi3kno.github.io/polite/): responsible web etiquette (informing the website that you are scraping)
 - [RSelenium](https://docs.ropensci.org/RSelenium/index.html): using a bot to interact with a website
 
@@ -304,14 +321,14 @@ bis_website_path <- "https://www.bis.org/cbspeeches/index.htm"
 
 ::: {.fragment .nonincremental}
 - Two basic ways to scrape a series of pages:
-  - Interacting with the website by using a bot browser (the more complicated one, using RSelenium)
-  - Understanding/extracting the "structure" of the website (only need rvest in many cases)
+  - Interacting with the website by using a bot browser (the more complicated one, using ```RSelenium```)
+  - Understanding/extracting the "structure" of the website (only need ```rvest``` in many cases)
 :::
 
 ::: {.fragment .nonincremental}
 - Cases in which you need to interact with the website
-  - When you need to scroll to have the full content
-  - When you need to open menus to display all the content
+  - When you need to scroll to have the full page content
+  - When you need to open menus to display all the page content
   - When you need to type in a search bar and run a search
   
 :::
@@ -432,13 +449,31 @@ There are many ways to scrape, but your baseline scenario is:
 4. **Store** the information retrieved in a data frame. 
 :::
 
-## Scraping a BIS speech with rvest {.smaller .scrollable}
+## Scraping a BIS speech with rvest 
 
-![Example of Speech](text_BIS.png){width=86% fig-align="center"}
+![[https://www.bis.org/review/r241022f.htm](https://www.bis.org/review/r241022f.htm)](text_BIS.png){width=86% fig-align="center"}
 
-## Scraping a BIS speech with rvest {.smaller .scrollable}
+## Scraping one page: using a scrape helper
 
-![Example of Speech](title.png){width=86% fig-align="center"}
+:::{.incremental .highlight-last}
+- Scraping add-ons on browser help you navigating through elements in a webpage
+  - ```XPath``` is the path towards a specific part of a webpage
+  - ```CSS selectors``` are first for styling web pages, but allows to match position of an element within HTML structures
+- Typical scraping helpers: [ScrapeMate](https://addons.mozilla.org/fr/firefox/addon/scrapemate/) and [SelectorGadget](https://chromewebstore.google.com/detail/selectorgadget/mhjhnkcfbdhnjickkkdbjoemdmbfginb?pli=1)
+
+:::
+
+::: {.notes}
+First goes to the page and look at what a webpage looks like
+:::
+
+## Scraping a BIS speech with rvest
+
+![](title.png){width=90% fig-align="center"}
+
+:::{.notes}
+Rather use directly scrapemate in the browser to show them
+:::
 
 ## Scraping a BIS speech with rvest {.smaller .scrollable}
 
@@ -483,21 +518,19 @@ page %>%
 ## Scraping BIS: understanding URLs
 
 :::{.fragment .small-text}
-- Our query on the list of speeches:
-
-[https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25](https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25)
+- Our query on the list of speeches: [https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25](https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25)
 :::
 
 :::{.fragment}
 ```{r}
 #| output-location: fragment
-#| code-line-numbers: "|5"
-page <- 2
+#| code-line-numbers: "1|2|3|4|6"
 day <- "01"
 month <- "10"
 year <- 2024 # we want to look at all the speech since October 1st 2024
+page <- 2
+# The package glue allows to insert variables in a text string 
 url_second_page <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
-
 print(url_second_page)
 ```
 :::
@@ -506,20 +539,6 @@ print(url_second_page)
 - Go to: "https://www.bis.org/cbspeeches/index.htm". Change date. Then display 25 speeches. And go to page 2.
 - Often you may use both rvest and Rselenium
 - Looking at the Website and the pattern of URL
-:::
-
-## Scraping one page: using a scrape helper
-
-:::{.incremental .highlight-last}
-- Scraping add-ons on browser help you navigating through elements in a webpage
-  - ```XPath``` is the path towards a specific part of a webpage
-  - ```CSS selectors``` are first for styling web pages, but allows to match position of an element within HTML structures
-- Typical scraping helpers: [ScrapeMate](https://addons.mozilla.org/fr/firefox/addon/scrapemate/) and [SelectorGadget](https://chromewebstore.google.com/detail/selectorgadget/mhjhnkcfbdhnjickkkdbjoemdmbfginb?pli=1)
-
-:::
-
-::: {.notes}
-First goes to the page and look at what a webpage looks like
 :::
 
 ## Scraping the query page: mixing [rvest](https://rvest.tidyverse.org/) and [RSelenium](https://docs.ropensci.org/RSelenium/index.html)
@@ -673,27 +692,27 @@ driver$server$stop() # we close the bot once we've finished
 
 ## Easy exercise 
 
+:::{.incremental .highlight-last}
 - **You want to scrape and analyze results of the 2024 UK General Election from the BBC website.**
 
-:::{.incremental .highlight-last .small-text}
+:::{.small-text}
 - Objectives:
   - Count the number of parties with at least one seat.
   - Determine which parties won or lost compared with the previous election.
   - Calculate and visualize the average votes per seat for each parties with at least one seat.
   - Compare findings for the entire UK vs. England.
-  
+
+:::
 :::
 :::
 
 ## Easy exercise {.smaller}  
 
-- **Approach**
-
+### **Approach**
 
 :::{.incremental .highlight-last .small-text}
 
-
- 1. Use the rvest and polite packages to retrieve data from the BBC website for party names, seats, votes, and seat changes for all parties in the UK.
+ 1. Use the rvest and polite packages to retrieve data from the [BBC website](https://www.bbc.com/news/election/2024/uk/results) for party names, seats, votes, and seat changes for all parties in the UK.
  
  2. Organize data into a dataframe and clean it. Converte seat and vote counts to numeric and remove extraneous symbols.
 
@@ -704,32 +723,33 @@ driver$server$stop() # we close the bot once we've finished
   - Calculate votes per seat for each party with a least one seat.
   - Plot the number of votes per seat for all parties with a least one seat
 
- 4. Repeat the  process for parties in England and then compare the results between the UK and England.
+ 4. Repeat the  process for [parties in England](https://www.bbc.com/news/election/2024/uk/regions/E92000001) and then compare the results between the UK and England.
 
 :::
 
-
-
 ## Medium exercise part 1 {.smaller .scrollable}
+
 You want to know what happened to the files which were EU legislative priorities in 2023-2024
 
-::: {.small-text .scrollable}
-**1. Scrape the basic information**
+::: {.small-text}
+
+- **1. Scrape the basic information**
 
 We are going to list all relevant procedures. In the EU, once proposed each piece of legislation has a procedure number, including 'COD'. 
 
-Go to this page that lists the legislative files which were priorities for 2023-24: https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en 
+Go to the [page](https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en) that lists the legislative files which were priorities for 2023-24
 
 You have to scrape this page to obtain a data frame, in which there will be: 
 
 - the title
-
 - number 
-
 - url towards the specific page of each procedure
 
-Check one or two links - can you copy paste them in a browser and access the page?
-Is there anything missing in the URL? How could you fix this?
+Check one or two links 
+
+- can you copy paste them in a browser and access the page?
+- Is there anything missing in the URL? How could you fix this?
+
 Search manually a procedure to find out how urls are made: https://oeil.secure.europarl.europa.eu/oeil/search/search.do?searchTab=y
 
 **Tip**: you can use the `paste()` function. 
@@ -738,7 +758,9 @@ Search manually a procedure to find out how urls are made: https://oeil.secure.e
 ## Medium exercise part 2
 
 :::{.small-text}
-**2. Filter only the procedures of interest**
+
+- **2. Filter only the procedures of interest**
+
 Now you have listed the names of all relevant procedures, and the links to access them. Create a data frame that contains only procedure with 'COD' in their reference number. 
 
 **Tip**: you can use the the `str_detect()` function of `stringr`.
@@ -746,7 +768,7 @@ Now you have listed the names of all relevant procedures, and the links to acces
 
 ## Medium exercise part 3 {.scrollable .smaller}
 
-**3. Scrape a single page**
+- **3. Scrape a single page**
 Take this single URL link: https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en. 
 It is one of the ones you have listed
 
@@ -802,6 +824,21 @@ Search which function allows to do this!
 
 - **Spotting specific cases** Let's look for the longer process. When did that procedure start?
 :::
+
+## Difficult exercise {.smaller}
+
+### Scraping the [ECB occasional papers]("https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html")
+
+:::{.incremental .highlight-last}
+- **Goal**: Create a database with the titles, authors, abstracts, JEL-codes, URLs, and date of publication of all the ECB occasional papers. Find the most recurrent words and expressions in the abstracts and titles.
+- **Approach**: first look at the page and understand the structure of the page.
+  - Is the page fully loaded when you access it? If not, you will need to scroll down to access all the papers.
+  - Is the abstract or the JEL-codes visible? If not, you will need to click on a button.
+  - Considering this, you may need to use ```RSelenium``` to scrape the page.
+- Be careful to handle the particular structure of some information: for instance, you want to extract all the authors individually for each paper.
+- **Tip**: check that you always have the right number of information
+:::
+
 
 # Resources
 
