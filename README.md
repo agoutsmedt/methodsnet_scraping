@@ -8,6 +8,6 @@ workshop](https://methodsnet.org/workshop/methods-development-and-innovation-wor
 in October 2024 at UC Louvain.
 
 You will find [here](./slides/slides.html) the slides of the training
-session and [here](./exercises/) the R scripts of the difference
+session and [here](./exercises/) the R scripts of the different
 exercises proposed during the session. You can install all the required
 packages in advance by running the [setup script](./setup.R).
