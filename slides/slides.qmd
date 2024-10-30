@@ -124,13 +124,13 @@ p_load(here)
 :::{.columns}
 :::{.column width="50%"}
 
-![](exemple_wikipedia.png){width=91% fig-align="center"}
+![](pictures/exemple_wikipedia.png){width=91% fig-align="center"}
 
 :::
 :::{.column width="50%"}
 :::{.fragment}
 
-![](exemple_html.png){width=88% fig-align="center"}
+![](pictures/exemple_html.png){width=88% fig-align="center"}
 
 :::
 :::
@@ -235,7 +235,7 @@ Thomas
 
 ## Questions at stake [@krotov2020]
 
-![@krotov2020](legality_scraping.png){width=86% fig-align="center"}
+![@krotov2020](pictures/legality_scraping.png){width=86% fig-align="center"}
 
 :::{.notes}
 - No legislation specific to web scraping exist.
@@ -537,7 +537,7 @@ There are many ways to scrape, but your baseline scenario is:
 
 ## Scraping a BIS speech with rvest 
 
-![[https://www.bis.org/review/r241022f.htm](https://www.bis.org/review/r241022f.htm)](text_BIS.png){width=86% fig-align="center"}
+![[https://www.bis.org/review/r241022f.htm](https://www.bis.org/review/r241022f.htm)](pictures/text_BIS.png){width=86% fig-align="center"}
 
 
 ::: {.notes}
@@ -562,7 +562,7 @@ First goes to the page and look at what a webpage looks like
 
 ## Scraping a BIS speech with rvest
 
-![](title.png){width=90% fig-align="center"}
+![](pictures/title.png){width=90% fig-align="center"}
 
 :::{.notes}
 **slide presenter**: Marine
@@ -677,7 +677,7 @@ element$getElementText()[[1]]
 
 ```{r}
 #| echo: FALSE
-date <- "09 Oct 2024"
+date <- "24 Oct 2024"
 print(date)
 ```
 
@@ -707,7 +707,7 @@ elements[[25]]$getElementText()[[1]]
 
 ```{r}
 #| echo: FALSE
-last_date <- "02 Oct 2024"
+last_date <- "15 Oct 2024"
 print(last_date)
 ```
 
