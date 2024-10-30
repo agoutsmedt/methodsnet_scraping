@@ -173,7 +173,7 @@ QUI FAIT CETTE SLIDE?
 ## Forget about big data, small data is everywhere!
 ::: {.notes}
 **Slide presenter**
-QUI FAIT CETTE SLIDE?
+Thomas?
 -> si besoin Marine peut faire
 :::
 
@@ -202,7 +202,7 @@ Do you have ideas of data you may be interested to collect? Why you did not do i
 ### Involves a series of questions:
 ::: {.notes}
 **Slide presenter**
-QUI FAIT CETTE SLIDE?
+Thomas?
 -> si besoin Marine peut faire
 :::
 :::{.incremental .highlight-last}
@@ -223,7 +223,7 @@ QUI FAIT CETTE SLIDE?
 ## Ethical considerations
 ::: {.notes}
 **Slide presenter**
-QUI FAIT CETTE SLIDE?
+Thomas?
 :::
 
 :::{.incremental .highlight-last  .small-text}
@@ -236,7 +236,7 @@ QUI FAIT CETTE SLIDE?
 ## Questions at stake [@krotov2020]
 ::: {.notes}
 **Slide presenter**
-QUI FAIT CETTE SLIDE?
+Thomas?
 :::
 
 ![@krotov2020](legality_scraping.png){width=86% fig-align="center"}
@@ -254,7 +254,7 @@ QUI FAIT CETTE SLIDE?
 ## Ethical practices
 ::: {.notes}
 **Slide presenter**
-QUI FAIT CETTE SLIDE?
+Thomas?
 :::
 
 :::{.incremental .highlight-last}
