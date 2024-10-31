@@ -1,6 +1,6 @@
 ################# Installing packages needed ################
 
-#' Please run this scrip before the training session to install the required packages
+#' Please run this script before the training session to install the required packages
 if(length(grep("pacman", installed.packages())) == 0) install.packages("pacman")
 library(pacman)
 
