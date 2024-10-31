@@ -106,7 +106,7 @@ p_load(here)
 
 :::{.incremental .highlight-last}
 :::{.small-text}
-- The **web scraping** is a method for extracting data available in the World Wide Web 
+- The **web scraping** is a method for automatically extracting data available in the World Wide Web 
 - The World Wide Web, or "Web", is a network of websites (online documents coded in ```html``` and ```css```)
 - A **web scraper** is a program, for instance in  ```R ```, that automatically read the ```html``` structure of a website and extract the relevant content (text, hypertext references, tables)
   - No need to fully understand ```html``` and ```css```
@@ -231,6 +231,15 @@ Thomas
 ::: {.notes}
 **Slide presenter**
 Thomas
+General Data Protection Regulation
+If you look closely, you’ll find many websites include a “terms and conditions” or “terms of service” link somewhere on the page, and if you read that page closely you’ll often discover that the site specifically prohibits web scraping. These pages tend to be a legal land grab where companies make very broad claims. It’s polite to respect these terms of service where possible, but take any claims with a grain of salt.
+US courts have generally found that simply putting the terms of service in the footer of the website isn’t sufficient for you to be bound by them
+
+Exemple OKcupid
+
+While the researchers felt that there was nothing wrong with this since the data were already public, this work was widely condemned due to ethics concerns around identifiability of users whose information was released in the dataset. If your work involves scraping personally identifiable information, we strongly recommend reading about the OkCupid study3 as well as similar studies with questionable research ethics involving the acquisition and release of personally identifiable information.
+
+General Data Protection Regulation
 :::
 
 ## Questions at stake [@krotov2020]
@@ -264,6 +273,22 @@ Thomas
 ::: {.notes}
 **Slide presenter**
 Thomas
+ In any case, you should be respectful of the resources of the server hosting the pages you are scraping. Most importantly, this means that if you’re scraping many pages, you should make sure to wait a little between each request.
+:::
+
+## Ethical practices
+
+- Can my actions in relation to Web data produce harm to individuals, organizations, or
+communities?
+
+- What can I do to provide reasonable assurance that this unintended harm does not happen?
+
+If the data is public, non-personal, and factual, you’re likely to be ok
+
+::: {.notes}
+**Slide presenter**
+Thomas
+If the data isn’t public, non-personal, or factual or you’re scraping the data specifically to make money with it, you’ll need to talk to a lawyer.
 :::
 
 # How to scrape a website? 
