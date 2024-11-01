@@ -33,6 +33,7 @@ name_procedure <- html_elements(page,css = ".ep-table-cell-xxl .ep_name") %>%
 
 # We still have some "\r" which is a code for returning to the beginning of the line. 
 # You can use two functions from the stringr package: str_remove_all() to remove all the "\r" and str_squish() to remove all the resulting extra white spaces.
+# To remove unwanted characters, you could also use grepl
 # Don't forget to print the resulting vector to check the result!
 clean_name_procedure <- name_procedure %>%
   str_remove_all(., "\r") %>%
@@ -46,13 +47,14 @@ clean_number_procedure <- html_elements(page, css = ".ep-table-cell-s .ep_name")
 
 # Select all the links towards the procedure pages
 link_procedure <- html_elements(page, css = ".ep-table-cell-s a") %>%
-  html_attr("href")
+  html_attr("href") # this is a case where we do not read the text!
 
 # Check one or two links - can you copy paste them in a browser and access the page?
 # Is there anything missing in the URL? How could you fix this?
 # Search manually a procedure here to find out how urls are made: https://oeil.secure.europarl.europa.eu/oeil/search/search.do?searchTab=y
 # Tip: you can use the paste function 
 clean_link_procedure <- paste0("https://oeil.secure.europarl.europa.eu", link_procedure)
+# paste0 is a function which pastes witout any separator
 
 # Check the length of the vectors. They should all be the same.
 if(length(clean_name_procedure) == length(clean_number_procedure) & length(clean_number_procedure) == length(link_procedure)){
