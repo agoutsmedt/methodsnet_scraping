@@ -388,7 +388,7 @@ Marine
 ```{r}
 p_load(rvest, # scraping and manipulating html pages
        polite, # scraping ethically
-       RSelenium) # scraping by interacting with RSelenium
+       RSelenium) # scraping by interacting with websites
 ```
 
 - Additional tool to navigate ```html``` and ```css``` code: [SelectorGadget](https://selectorgadget.com/)  or [ScrapeMate](https://addons.mozilla.org/fr/firefox/addon/scrapemate/)
