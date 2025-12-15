@@ -1,0 +1,830 @@
+---
+title: "Maîtriser le Web Scraping pour la collecte de données"
+subtitle: "Atelier ICHEC"
+author: "Aurélien Goutsmedt"
+date: "12/16/2026"
+date-format: long
+lang: fr
+filters: [pandoc-quotation.lua]
+quot-lang: fr
+format:
+  revealjs: 
+    theme: 
+      [solarized, custom.scss]
+    transition: convex
+    slide-number: true
+    toc: false 
+    toc-depth: 1
+    slide-level: 2
+    number-sections: true
+    number-depth: 1
+    css: "custom.css"
+    embed-resources: true
+    view-distance: 100
+    progress: true
+    width: 1200
+    margin: 0.01
+    preview-links: true
+    code-tools: true
+    code-line-numbers: false
+    code-copy: true
+    # code-link: true
+    code-overflow: wrap
+    code-block-height: 400px
+    center: true
+lightbox: auto
+bibliography: "bibliography.bib" 
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, cache = TRUE, echo = TRUE)
+```
+
+# Objectifs de la formation
+
+## Objectifs de la formation {.smaller}
+
+:::{.incremental .highlight-last}
+
+- Donner une compréhension de base de ce qu'est le web scraping et de ce qu'il permet
+- Discuter des enjeux éthiques (et juridiques) liés au web scraping
+- Proposer une feuille de route pour apprendre à pratiquer le web scraping en R
+- Fournir des bouts de code et des conseils pratiques
+- Mise en pratique: exercices par niveau de difficulté
+
+:::
+
+:::{.fragment}
+### Télécharger les documents
+
+[https://github.com/agoutsmedt/methodsnet_scraping/](https://github.com/agoutsmedt/methodsnet_scraping/)
+
+- [slides](https://github.com/agoutsmedt/methodsnet_scraping/blob/master/slides/slides.html)
+- [slides avec code](https://github.com/agoutsmedt/methodsnet_scraping/blob/master/slides/slides.qmd)
+- [exercices](https://github.com/agoutsmedt/methodsnet_scraping/tree/master/exercises)
+:::
+
+## Pré-requis
+
+:::{.incremental .highlight-last .small-text}
+- Besoin de R et RStudio (ou Positron) pour reproduire les codes et suivre les exercices
+- Ces slides sont construites à partir d'un fichier `.qmd` (quarto) — tout le code utilisé dans ces slides peut être exécuté dans RStudio/Positron
+:::
+
+::: {.fragment .small-text}
+```{r installing-packages}
+# Ces lignes doivent être exécutées en amont si vous souhaitez installer tous les paquets
+
+# pacman sera utilisé pour installer (si nécessaire) et charger les paquets
+if(length(grep("pacman", installed.packages())) == 0) install.packages("pacman") # vérifie si installé
+library(pacman)
+
+# Installation des paquets nécessaires
+p_load(tidyverse, # suite de base
+       glue, # utile pour construire des chaînes (notamment pour les url)
+       scico, # palettes de couleurs
+       patchwork, # pour juxtaposer des graphiques
+       DT) # pour afficher des tables html
+```
+:::
+
+```{r}
+#| echo: FALSE
+p_load(here)
+```
+
+# Qu'est-ce que le web scraping
+
+## Qu'est-ce que le web scraping ?
+
+:::{.incremental .highlight-last}
+:::{.small-text}
+- Le **web scraping** est une méthode pour extraire automatiquement des données disponibles sur le World Wide Web
+- Le World Wide Web, ou "Web", est un réseau de sites web (documents en ligne codés en ```html``` et ```css```)
+- Un **web scraper** est un programme, par exemple en ```R```, qui lit automatiquement la structure ```html``` d'un site et en extrait le contenu pertinent (texte, liens, tableaux)
+  - Pas besoin de comprendre parfaitement ```html``` et ```css```
+- Utile quand il y a beaucoup de pages à scraper
+
+:::
+:::
+
+## Qu'est-ce que HTML et CSS ?
+
+:::{.columns}
+:::{.column width="50%"}
+
+![](pictures/exemple_wikipedia.png){width=91% fig-align="center"}
+
+:::
+:::{.column width="50%"}
+:::{.fragment}
+
+![](pictures/exemple_html.png){width=88% fig-align="center"}
+
+:::
+:::
+:::
+
+## API vs. web scraping
+
+
+:::{.incremental .highlight-last .small-text}
+- **API (Application Programming Interface)** offre un moyen structuré et prévisible de récupérer des données depuis un service. C'est comme commander dans un menu : vous demandez des données spécifiques et vous les recevez dans un format structuré
+  - [Twitter API](https://developer.x.com/en/docs/x-api)
+  - [Wikidata API](https://www.wikidata.org/wiki/Wikidata:REST_API)
+  - API pour données bibliométriques comme Scopus, Web of Science, Google Scholar...
+- **Web scraping** = extraction programmée de données depuis le HTML d'une page web. Comparable à copier manuellement des informations dans un livre : vous décidez quoi extraire et comment le faire
+
+:::
+
+## API vs. web scraping
+
+:::{.incremental .highlight-last .small-text}
+- **Contrôle et structure** : les API offrent un accès structuré aux données, tandis que le *scraping* nécessite d'extraire les données du code HTML et souvent de les nettoyer soi-même.
+- **Facilité d'utilisation** : utiliser une API peut être plus simple puisque conçue pour l'accès aux données. Le scraping demande de gérer les changements HTML et le code est plus susceptible de ne plus marcher avec le temps.
+- **Disponibilité** : tous les sites n'offrent pas d'API, rendant le scraping parfois nécessaire.
+- **Limitations et autorisation** : les API imposent souvent des limites de taux et peuvent exiger une authentification ; le scraping peut contourner ces limites mais peut violer les conditions d'utilisation.
+:::
+
+## Oubliez le *big data*, le *small data* est partout !
+
+:::{.incremental .highlight-last}
+- De nombreuses possibilités de données à collecter :
+  - documents officiels/discours/communications diverses
+  - agendas et réunions
+  - listes de personnels ou d'experts dans des commissions
+  - lois ou négociations
+- Pour prendre en compte l'évolution des pages web dans le temps, on peut utiliser [Internet Archive](http://web.archive.org/)
+:::
+
+## Construire des bases de données {.smaller}
+
+### Implique une série de questions :
+
+:::{.incremental .highlight-last}
+ 
+- Quelle est votre question de recherche et quelles données sont appropriées pour y répondre ?
+- Quelle quantité de données collecter ?
+  - compromis entre collecter beaucoup d'informations (ce qui prend plus de temps) et risquer d'en manquer plus tard
+- Comment *scraper* les données ? Sous quel format ?
+  - interaction entre extraire proprement dès le départ ou nettoyer ensuite
+- Que perd-on en automatisant par rapport au travail manuel ? (ou inversement)
+- Comment analyser/comprendre ces nouvelles données ?
+- Comment mettre à jour la base de données ?
+
+:::
+
+# L'éthique du web scraping
+
+## Considérations éthiques
+
+:::{.incremental .highlight-last  .small-text}
+- **Considérations juridiques** : toutes les données ne sont pas libres de scraping. Les conditions d'utilisation des sites peuvent interdire explicitement le scraping et, dans certaines juridictions, le scraping peut avoir des implications légales
+  - Ce qui est "interdit" par un site n'est pas nécessairement "illégal"
+- **Problèmes de vie privée** : scraper des données personnelles peut poser des problèmes de confidentialité et être soumis à des réglementations comme le RGPD en Europe
+- **Performance du site** : un scraping agressif (trop de requêtes en peu de temps) peut impacter la performance d'un site
+:::
+
+
+## Questions en jeu [@krotov2020]
+
+![@krotov2020](pictures/legality_scraping.png){width=86% fig-align="center"}
+
+:::{.notes}
+- Pas de législation spécifique au web scraping.
+  - Il peut être impossible de déterminer la légalité de certaines actions de scraping.
+- Incertitude sur la violation des "terms of use" : souvent considéré comme une question de contrat ; les tribunaux américains ont jugé que placer des conditions dans le footer d'un site n'est généralement pas suffisant.
+- Exemples et risques : infraction au CFAA, breach of contract, trespass to chattels, trade secrets selon l'usage.
+:::
+
+## Pratiques éthiques
+
+:::{.incremental .highlight-last}
+- **Respecter le `robots.txt`** : ce fichier indique les parties à ne pas scraper
+- **Limiter le rythme des requêtes** : faire des pauses raisonnables pour ne pas surcharger le serveur
+- **User-Agent** : s'identifier pour que le propriétaire comprenne la nature du trafic
+- **Usage des données** : considérer les implications éthiques de l'utilisation des données scrapées, respecter la vie privée
+
+:::
+
+## Pratiques éthiques (suite)
+
+:::{.incremental .highlight-last}
+
+- Mes actions peuvent-elles nuire à des individus, organisations ou communautés ?
+
+- Que puis-je faire pour réduire ce risque de préjudice non intentionnel ?
+
+:::{.fragment}
+> **Si les données sont publiques, non personnelles et factuelles, c'est probablement acceptable**
+:::
+:::
+
+
+# Comment scraper un site ?
+
+## Qu'est-ce que R ?
+
+:::{.incremental .highlight-last}
+- Langage de programmation créé à la fin des années 1990 pour le calcul statistique
+- Libre et open source
+- Enrichi par de nombreux paquets (*packages*)
+- Généralement utilisé via l'environnement *RStudio* (mais aussi *Positron* désormais)
+
+:::
+
+
+## Concepts de base en R
+
+:::{.incremental .highlight-last .small-text}
+- **objet** : une "boîte" à laquelle on donne un nom et dans laquelle on place des choses
+- **data frame** (type d'objet) : comparable à un tableur
+
+:::{.fragment}
+```{r}
+#| output-location: fragment
+firstnames <- c("Anna", "Laura", "Lise")
+firstnames
+```
+:::
+:::{.fragment}
+```{r}
+#| output-location: fragment
+ages <- c(26,28,25)
+ages
+```
+:::
+:::{.fragment}
+```{r}
+#| output-location: fragment
+discipline <- c("maths", "sociology", "law")
+discipline
+```
+:::
+:::{.fragment}
+```{r}
+#| output-location: fragment
+my_data <- data.frame(firstnames, ages, discipline)
+my_data
+```
+:::
+:::
+
+::: {.notes}
+**Présentateur**: Marine
+:::
+
+## Concepts de base en R (suite)
+
+:::{.incremental .highlight-last}
+- **fonction**: bloc de code prenant des entrées et retournant un résultat. On peut définir ses propres fonctions, beaucoup existent déjà.
+
+:::{.fragment}
+```{r}
+#| output-location: fragment
+length(firstnames)
+```
+:::
+
+- **package**: contient essentiellement des fonctions
+
+:::{.fragment}
+```{r}
+#| output-location: fragment
+library(stringr)
+str_detect(firstnames, "Anna")
+```
+:::
+:::
+
+::: {.notes}
+**Présentateur**: Marine
+:::
+
+## Paquets utiles pour le webscraping en R
+
+:::{.incremental .highlight-last}
+- [rvest](https://rvest.tidyverse.org/): navigation et extraction depuis le HTML
+- [polite](https://dmi3kno.github.io/polite/): étiquette responsable pour le scraping (politesse)
+- [RSelenium](https://docs.ropensci.org/RSelenium/index.html): interaction avec le site via un navigateur automatisé
+
+:::{.fragment}
+```{r}
+p_load(rvest, # scraping et manipulation du HTML
+       polite, # scraping éthique
+       RSelenium) # scraping en interagissant avec les sites
+```
+
+- Outils additionnels pour naviguer dans le HTML/CSS : [SelectorGadget](https://selectorgadget.com/) ou [ScrapeMate](https://addons.mozilla.org/fr/firefox/addon/scrapemate/)
+:::
+:::
+
+::: {.notes}
+**Présentateur**: Marine
+:::
+
+## Naviguer sur le site
+
+:::{.incremental .highlight-last .small-text}
+
+::: {.fragment}
+```{r}
+bis_website_path <- "https://www.bis.org/cbspeeches/index.htm"
+```
+:::
+
+::: {.fragment .nonincremental}
+- Deux manières basiques de scraper une série de pages :
+  - Interagir avec le site via un navigateur automatisé, avec `RSelenium` (plus compliqué au début)
+  - Comprendre/extraire la "structure" du site et *scraper* avec `rvest` (souvent suffisant)
+
+:::
+
+::: {.fragment .nonincremental}
+- Cas nécessitant une interaction :
+  - Nécessité de scroller pour charger le contenu
+  - Ouvrir des menus pour afficher le contenu
+  - Saisir une recherche dans une barre et lancer la recherche
+  
+:::
+:::
+
+
+## Le rôle des "*sitemaps*"
+
+:::{.incremental .highlight-last .small-text}
+- Sitemap : informe les moteurs de recherche des URLs disponibles pour le crawling
+  - Permet de comprendre la structure du site
+  - Trouver où se situe l'information à extraire
+
+:::{.fragment .nonincremental}
+- En général :
+  - `<domain>/sitemap.xml`
+  - `<domain>/sitemap_index.xml`
+  - `<domain>/sitemap`
+  - pour BIS : [https://www.bis.org/sitemap.xml](https://www.bis.org/sitemap.xml)
+
+:::
+:::
+
+## Être respectueux du site {.scrollable}
+
+::: {.fragment .very-small-text}
+
+```{r}
+session <- polite::bow(bis_website_path, 
+                       user_agent = "polite R package - academic training by Aurélien Goutsmedt (aurelien.goutsmedt[at]ichec.be)")
+```
+
+:::
+
+::: {.fragment .very-small-text}
+```{r}
+#| output-location: fragment
+cat(session$robotstxt$text)
+```
+
+:::
+
+::: {.fragment .very-small-text}
+```{r}
+#| output-location: fragment
+session$robotstxt$sitemap
+```
+
+:::
+
+
+## Utiliser le sitemap {.scrollable .smaller}
+
+```{r}
+#| code-fold: true
+
+# Cette fonction va sur une page sitemap et extrait toutes les urls trouvées
+extract_url_from_sitemap <- function(url, delay = 1) {
+  urls <- read_html(url) %>%
+    html_elements(xpath = ".//loc") %>%
+    html_text()
+  Sys.sleep(delay) # Pause pour éviter de surcharger le site
+  return(urls)
+}
+
+document_pages <- extract_url_from_sitemap(session$robotstxt$sitemap$value) %>%
+  .[str_detect(., "documents")] # on conserve seulement les URLs des documents
+
+# insistently permet de réessayer en cas d'échec de chargement
+# Utile avec des pages lentes telles que les sitemaps
+insistently_extract_url <- insistently(
+  extract_url_from_sitemap,
+  rate = rate_backoff(max_times = 5)
+)
+
+bis_pages <- map(
+  document_pages[1:5], # on montre le code seulement pour les cinq premières années
+  ~ insistently_extract_url(url = ., delay = session$delay)
+)
+
+bis_pages <- tibble(
+  year = str_extract(document_pages[1:5], "\\d{4}"),
+  urls = bis_pages
+) %>%
+  unnest(urls)
+```
+
+```{r}
+#| echo: FALSE
+#| 
+datatable(bis_pages,
+          rownames = FALSE,
+          class = 'cell-border stripe',
+          options = list(
+            searching = FALSE, # retire la barre de recherche
+            pageLength = 10, # nombre de lignes initial affichées
+            dom = "tip")) %>%
+  # Ajout d'un style pour réduire la taille de la police
+  htmlwidgets::onRender("\n    function(el, x) {\n      $(el).css('font-size', '14px');  // Ajuste la taille de la police\n      $(el).find('th').css('font-size', '12px');  // Ajuste la taille des en-têtes\n    }\n  ")
+```
+
+## Les étapes clés du web scraping
+
+Plusieurs façons de faire, mais le scénario de base est :
+
+:::{.incremental .highlight-last}
+1. **Lire le code html** de la page (accès direct via une URL ou après interaction via RSelenium).
+
+2. **Extraire** des éléments spécifiques avec des sélecteurs.
+
+3. **Lire le texte** contenu dans ces éléments.
+
+4. **Stocker** les informations récupérées dans un data frame.
+:::
+
+
+## Scraper un discours BIS avec rvest
+
+![[https://www.bis.org/review/r241022f.htm](https://www.bis.org/review/r241022f.htm)](pictures/text_BIS.png){width=86% fig-align="center"}
+
+
+## Scraper une page : utiliser un helper
+
+:::{.incremental .highlight-last}
+- Des extensions dans le navigateur aident à localiser les éléments d'une page
+  - `XPath` est le chemin vers une partie spécifique de la page
+  - `CSS selectors` servent d'abord au style mais permettent aussi de cibler des éléments dans le HTML
+- Outils typiques : [ScrapeMate](https://addons.mozilla.org/fr/firefox/addon/scrapemate/) et [SelectorGadget](https://selectorgadget.com/)
+
+:::
+
+## Scraper un discours BIS avec rvest
+
+![](pictures/title.png){width=90% fig-align="center"}
+
+## Scraper un discours BIS avec rvest {.smaller .scrollable}
+
+:::{.fragment}
+
+```{r}
+#| output-location: fragment
+url_speech <- "https://www.bis.org/review/r251209e.htm"
+page <- read_html(url_speech)
+print(page)
+```
+:::
+
+:::{.fragment}
+
+```{r}
+#| output-location: fragment
+page %>% 
+  html_element("h1") %>%
+  html_text()
+```
+
+:::
+
+:::{.fragment}
+
+```{r}
+#| output-location: fragment
+page %>% 
+  html_element("#extratitle-div p:nth-child(1)") %>% 
+  html_text()
+```
+
+:::
+
+## Scraper un discours BIS avec rvest {.smaller .scrollable}
+
+:::{.fragment}
+
+```{r}
+#| output-location: fragment
+page %>% 
+  html_elements(".Reden") %>% 
+  html_text
+```
+:::
+
+## Comprendre les URLs du BIS
+
+:::{.fragment .small-text}
+- Notre requête pour la liste des discours : [https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F12%2F2025&cbspeeches_page=2&cbspeeches_page_length=25](https://www.bis.org/cbspeeches/index.htm?fromDate=01%2F01%2F2022&cbspeeches_page=2&cbspeeches_page_length=25)
+:::
+
+:::{.fragment}
+
+```{r}
+#| output-location: fragment
+#| code-line-numbers: "1|2|3|4|6"
+day <- "01"
+month <- "12"
+year <- 2025 # on veut regarder tous les discours depuis le 1er octobre 2024
+page <- 2
+# Le paquet glue permet d'insérer des variables dans une chaîne
+url_second_page <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
+print(url_second_page)
+```
+
+:::
+
+## Scraper la page de résultat : mixer `rvest` et `RSelenium`
+
+```{r launching-bot}
+#| eval: false
+# Lancer Selenium pour aller sur le site BIS
+driver <- rsDriver(browser = "firefox", # peut aussi être "chrome"
+                   chromever = NULL,
+                   port = 4444L,
+                   check = FALSE) 
+remote_driver <- driver[["client"]]
+```
+
+## Scraper une page : mixer `rvest` et `RSelenium`
+
+::: {.fragment}
+```{r navigating}
+#| eval: FALSE
+remote_driver$navigate(url_second_page)
+Sys.sleep(session$delay)
+```
+:::
+
+<br>
+
+::: {.fragment}
+```{r element-date}
+#| eval: FALSE
+#| output-location: fragment
+element <- remote_driver$findElement("css selector", ".item_date")
+element$getElementText()[[1]]
+```
+
+```{r}
+#| echo: FALSE
+date <- "08 Dec 2025"
+print(date)
+```
+
+:::
+
+<br>
+
+::: {.fragment}
+```{r all-elements}
+#| eval: FALSE
+#| output-location: fragment
+elements <- remote_driver$findElements("css selector", ".item_date")
+length(elements)
+```
+
+```{r}
+#| echo: FALSE
+length <- 25
+print(length)
+```
+:::
+
+::: {.fragment}
+```{r extract-text}
+#| eval: FALSE
+#| output-location: fragment
+elements[[25]]$getElementText()[[1]]
+```
+
+```{r}
+#| echo: FALSE
+last_date <- "04 Dec 2025"
+print(last_date)
+```
+
+:::
+
+## Scraper une page {.smaller}
+
+```{r scraping-page}
+#| eval: FALSE
+#| code-fold: true
+data_page <- tibble(date = remote_driver$findElements("css selector", ".item_date") %>% 
+                      map_chr(., ~.$getElementText()[[1]]),
+                    info = remote_driver$findElements("css selector", ".item_date+ td") %>% 
+                      map_chr(., ~.$getElementText()[[1]]),
+                    url = remote_driver$findElements("css selector", ".dark") %>% 
+                      map_chr(., ~.$getElementAttribute("href")[[1]])) %>% 
+  separate(info, c("title", "description", "speaker"), "\n")
+```
+
+```{r}
+#| echo: FALSE
+# Données du chunk précédent sauvegardées : `saveRDS(data_page, here("slides", "data_page.rds"))`
+
+data_page <- readRDS(here("slides", "data_page.rds"))
+
+data_page %>% 
+  datatable(rownames = FALSE,
+     class = 'cell-border stripe',
+     options = list(
+       searching = TRUE, # active la barre de recherche
+       pageLength = 6, # nombre de lignes initiales
+       dom = "tip")) %>%
+  # Ajout d'un style pour réduire la taille de la police
+  htmlwidgets::onRender("\n    function(el, x) {\n      $(el).css('font-size', '14px');  // Ajuste la taille de la police\n      $(el).find('th').css('font-size', '12px');  // Ajuste la taille des en-têtes\n    }\n  ")
+```
+
+## Scraper toutes les pages {.smaller}
+
+```{r all-pages}
+#| eval: FALSE
+starting_url <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page=1&cbspeeches_page_length=25")
+remote_driver$navigate(starting_url)
+
+# Extraire le nombre total de pages
+nb_pages <- remote_driver$findElement("css selector", ".pageof")$getElementText()[[1]] %>%
+  str_remove_all("Page 1 of ") %>%
+  as.integer()
+
+# créer une liste pour stocker progressivement les infos
+metadata <- vector(mode = "list", length = nb_pages)
+
+for(page in 1:nb_pages){
+  url <- glue("https://www.bis.org/cbspeeches/index.htm?fromDate={day}%2F{month}%2F{year}&cbspeeches_page={page}&cbspeeches_page_length=25")
+  remote_driver$navigate(url)
+  nod <- nod(session, url) # présentation polie à la nouvelle page
+  Sys.sleep(session$delay) # respecter le délai défini par polite
+
+  metadata[[page]] <- tibble(date = remote_driver$findElements("css selector", ".item_date") %>% 
+                            map_chr(., ~.$getElementText()[[1]]),
+                          info = remote_driver$findElements("css selector", ".item_date+ td") %>% 
+                            map_chr(., ~.$getElementText()[[1]]),
+                          url = remote_driver$findElements("css selector", ".dark") %>% 
+                            map_chr(., ~.$getElementAttribute("href")[[1]])) 
+}
+
+metadata <- bind_rows(metadata) %>% 
+  separate(info, c("title", "description", "speaker"), "\n")
+driver$server$stop() # on ferme le bot
+```
+
+# Ressources
+
+## Ressources utiles
+- [Apprendre R (basique)](https://r4ds.had.co.nz/)
+- [R avancé](https://adv-r.hadley.nz/)
+- [Site d'exercices pour le scraping](https://practicewebscrapingsite.wordpress.com/)
+- [Tutoriel RSelenium](https://www.rselenium-teaching.etiennebacher.com/#/title-slide)
+
+## Références
+
+# Exercices
+
+## Exercices
+
+:::{.incremental .highlight-last}
+- Exercice facile : Scraper les résultats des élections britanniques 2024 ([https://www.bbc.com/news/election/2024/uk/results](https://www.bbc.com/news/election/2024/uk/results))
+- Exercice moyen : Scraper l'état de la législation de l'UE ([https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en](https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en))
+- Exercice difficile : Scraper les "occasional papers" de la BCE ([https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html](https://www.ecb.europa.eu/press/research-publications/occasional-papers/html/index.en.html))
+:::
+
+## Exercice facile
+
+:::{.incremental .highlight-last}
+- **Objectif** : Scraper et analyser les résultats des élections générales britanniques 2024 depuis le site de la BBC.
+
+:::{.small-text}
+- Objectifs d'analyse :
+  - Compter le nombre de partis avec au moins un siège.
+  - Déterminer quels partis ont gagné ou perdu par rapport à l'élection précédente.
+  - Calculer et visualiser le nombre moyen de voix par siège pour chaque parti ayant au moins un siège.
+  - Comparer les résultats pour l'ensemble du Royaume-Uni vs. l'Angleterre.
+
+:::
+:::
+
+## Approche (exercice facile)
+
+:::{.incremental .highlight-last .smaller-text}
+
+ 1. Utiliser `rvest` et `polite` pour récupérer les noms de partis, sièges, voix et changements de sièges depuis la page BBC.
+ 
+ 2. Organiser les données dans un data frame et nettoyer (convertir sièges et voix en numériques, retirer symboles inutiles).
+
+ 3. Analyses :
+  
+  - Compter les partis avec au moins un siège.
+  - Ordonner les partis selon gains/pertes de sièges.
+  - Calculer votes par siège pour chaque parti avec au moins un siège.
+  - Tracer les votes par siège pour ces partis.
+
+ 4. Répéter le processus pour l'Angleterre ([https://www.bbc.com/news/election/2024/uk/regions/E92000001]) puis comparer.
+
+:::
+
+## Exercice moyen — partie 1 {.smaller .scrollable}
+
+Vous voulez savoir ce qu'il est advenu des dossiers législatifs prioritaires de l'UE en 2023-2024
+
+::: {.small-text}
+
+- **1. Scraper les informations de base**
+
+Nous allons lister toutes les procédures pertinentes. Dans l'UE, chaque proposition législative a un numéro de procédure, incluant 'COD'.
+
+Allez sur la [page](https://oeil.secure.europarl.europa.eu/oeil/popups/thematicnote.do?id=41380&l=en) listant les fichiers législatifs prioritaires 2023-24.
+
+Vous devez scraper cette page pour obtenir un data frame contenant :
+
+- le titre
+- le numéro
+- l'url vers la page spécifique de chaque procédure
+
+Vérifiez une ou deux liaisons :
+
+- pouvez-vous les ouvrir dans un navigateur ?
+- Quelque chose manque-t-il dans l'URL ? Comment corriger cela ?
+
+Astuce : utilisez `paste()`.
+:::
+
+## Exercice moyen — partie 2
+
+:::{.small-text}
+
+- **2. Filtrer uniquement les procédures d'intérêt**
+
+Maintenant que vous avez listé les noms et les liens, créez un data frame ne contenant que les procédures avec 'COD' dans leur référence.
+
+Astuce : `str_detect()` de `stringr`.
+:::
+
+## Exercice moyen — partie 3 {.scrollable .smaller}
+
+- **3. Scraper une page unique**
+Prenez l'URL : https://oeil.secure.europarl.europa.eu/oeil/popups/ficheprocedure.do?reference=2021/0433(CNS)&l=en
+
+Dans un data frame (une ligne, trois colonnes), scraper :
+
+- le **statut de la procédure** (à quel stade elle en est)
+
+- la **date de publication** de la proposition législative
+
+- la **date de décision** du Parlement européen
+
+Astuce : pour les dates, sélectionnez d'abord toutes les dates, puis les noms des événements correspondants, enfin gardez l'événement d'intérêt avec `grepl()` (par ex. "proposal").
+
+## Exercice moyen — partie 4 {.smaller .scrollable}
+
+- **4. Écrire une fonction**
+Écrire une fonction généralisant le scraping de la partie 3. Pour chaque URL, la fonction doit récupérer les trois informations ci-dessus. Appliquer la fonction sur votre liste d'URLs et stocker les résultats dans un data frame contenant aussi le numéro de procédure et l'URL.
+
+Astuce : `tibble()`, `return()`, `lapply()`.
+
+Certaines informations peuvent manquer sur certaines pages. Utilisez `length()` pour vérifier et écrire "To check" si non trouvé.
+
+## Exercice moyen — partie 5
+
+**5. Explorer les données**
+
+:::{.small-text .scrollable}
+- **Durée** : calculer le nombre de jours entre la proposition et la décision du PE dans une nouvelle colonne.
+
+Astuce : convertir en type date (chercher la fonction appropriée).
+
+- **Données manquantes** : que faire si la date de décision manque ? Attention au calcul de la durée.
+
+- **Cas particuliers** : chercher la procédure la plus longue ; quand a-t-elle commencé ?
+:::
+
+## Exercice difficile {.smaller}
+
+### Scraper les "occasional papers" de la BCE
+
+:::{.incremental .highlight-last}
+- **Objectif** : Créer une base avec les titres, auteurs, résumés, codes JEL, URLs et dates de publication de tous les "occasional papers" de la BCE. Trouver les mots/expressions les plus récurrents dans les résumés et titres.
+- **Approche** : inspecter la page et sa structure.
+  - La page se charge-t-elle complètement à l'accès ? Sinon, il faudra scroller.
+  - L'abstract ou les codes JEL sont-ils visibles ? Sinon, il faudra cliquer.
+  - Vous devrez probablement utiliser `RSelenium`.
+- Gérer la structure particulière de certaines infos : par ex. extraire tous les auteurs individuellement.
+- Astuce : vérifiez toujours que vous avez le bon nombre d'éléments extraits.
+:::
+
+

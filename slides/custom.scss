@@ -1,9 +1,12 @@
 /*-- scss:defaults --*/
 
+$body-color: #586e75;
+
 /*-- scss:rules --*/
 
-.highlight-last  {
-  color: grey;
+.highlight-last {
+  color: #586e75;
+
   .current-fragment {
     color: #5500ff;
   }
